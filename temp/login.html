@@ -1,0 +1,174 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Sovereign Vault - Secure Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@500;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed-variant": "#0e5138",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-container": "#5fc7b7",
+                    "on-primary-fixed": "#001d35",
+                    "on-surface": "#191c1f",
+                    "outline-variant": "#c1c7d0",
+                    "surface-dim": "#d9dade",
+                    "on-tertiary-fixed-variant": "#005048",
+                    "inverse-surface": "#2e3034",
+                    "surface-bright": "#f9f9fe",
+                    "tertiary-container": "#005148",
+                    "on-tertiary-fixed": "#00201c",
+                    "tertiary-fixed-dim": "#70d8c8",
+                    "surface-container-highest": "#e1e2e7",
+                    "on-surface-variant": "#42474f",
+                    "secondary": "#2c694e",
+                    "on-primary-container": "#87baf3",
+                    "on-error": "#ffffff",
+                    "surface-container": "#ededf2",
+                    "primary": "#003358",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "outline": "#727780",
+                    "surface": "#f9f9fe",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#004a7c",
+                    "on-secondary-container": "#316e52",
+                    "error-container": "#ffdad6",
+                    "error": "#ba1a1a",
+                    "on-secondary": "#ffffff",
+                    "surface-tint": "#296195",
+                    "secondary-container": "#aeeecb",
+                    "inverse-on-surface": "#f0f0f5",
+                    "secondary-fixed": "#b1f0ce",
+                    "on-secondary-fixed": "#002114",
+                    "surface-variant": "#e1e2e7",
+                    "inverse-primary": "#9ccaff",
+                    "on-background": "#191c1f",
+                    "primary-fixed-dim": "#9ccaff",
+                    "surface-container-low": "#f3f3f8",
+                    "surface-container-high": "#e7e8ed",
+                    "tertiary-fixed": "#8df5e4",
+                    "background": "#f9f9fe",
+                    "primary-fixed": "#d0e4ff",
+                    "tertiary": "#003832",
+                    "secondary-fixed-dim": "#95d4b3",
+                    "on-primary-fixed-variant": "#00497b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Manrope", "sans-serif"
+                    ],
+                    "body": [
+                            "Inter", "sans-serif"
+                    ],
+                    "label": [
+                            "Inter", "sans-serif"
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Main Content Canvas -->
+<main class="flex-grow flex items-center justify-center p-6 relative overflow-hidden">
+<!-- Abstract Background Element -->
+<div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+<div class="absolute top-[-10%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-primary/5 blur-[120px]"></div>
+<div class="absolute bottom-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-secondary/5 blur-[100px]"></div>
+</div>
+<!-- Authentication Card -->
+<div class="relative z-10 w-full max-w-md">
+<!-- Branding Header -->
+<div class="text-center mb-10">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-container-high mb-6 shadow-[0_12px_40px_rgba(25,28,31,0.06)]">
+<span class="material-symbols-outlined fill text-primary text-3xl" data-icon="lock" data-weight="fill" style="">lock</span>
+</div>
+<h1 class="font-headline font-extrabold text-3xl tracking-tight text-primary mb-2" style="">Suraksha Shield</h1>
+<p class="font-body text-on-surface-variant text-sm tracking-wide" style="">Secure Institutional Optimization</p>
+</div>
+<!-- Login Form Container -->
+<div class="bg-surface-container-lowest rounded-xl p-8 relative">
+<!-- Ambient Shadow -->
+<div class="absolute inset-0 rounded-xl shadow-[0_12px_40px_rgba(25,28,31,0.06)] pointer-events-none"></div>
+<!-- Ghost Border -->
+<div class="absolute inset-0 rounded-xl border border-outline-variant opacity-15 pointer-events-none"></div>
+<div class="relative z-10">
+<h2 class="font-headline font-bold text-xl text-on-surface mb-6" style="">Authenticate Session</h2>
+<form action="#" class="space-y-6" method="POST">
+<!-- Institutional Email Field -->
+<div>
+<label class="block font-label text-sm font-medium text-on-surface-variant mb-2 tracking-[0.05em]" for="email" style="">Institutional Email</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-lg" data-icon="mail" style="">mail</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 bg-surface-container-high border-0 border-b border-outline/30 text-on-surface focus:ring-0 focus:border-b-2 focus:border-primary transition-colors rounded-t-DEFAULT placeholder:text-outline-variant font-body" id="email" name="email" placeholder="user@institution.com" required="" type="email">
+</div>
+</div>
+<!-- Passphrase Field -->
+<div>
+<label class="block font-label text-sm font-medium text-on-surface-variant mb-2 tracking-[0.05em]" for="passphrase" style="">Passphrase</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-lg" data-icon="key" style="">key</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 bg-surface-container-high border-0 border-b border-outline/30 text-on-surface focus:ring-0 focus:border-b-2 focus:border-primary transition-colors rounded-t-DEFAULT placeholder:text-outline-variant font-body" id="passphrase" name="passphrase" placeholder="••••••••••••••••" required="" type="password">
+</div>
+</div>
+<!-- Options Row -->
+<div class="flex items-center justify-between mt-6">
+<div class="flex items-center">
+<input class="h-4 w-4 text-primary focus:ring-primary border-outline-variant rounded bg-surface-container-high" id="remember-me" name="remember-me" type="checkbox">
+<label class="ml-2 block font-label text-sm text-on-surface-variant cursor-pointer hover:text-on-surface transition-colors" for="remember-me" style="">
+                                    Maintain encrypted session on this device
+                                </label>
+</div>
+</div>
+<!-- Primary Action -->
+<div class="pt-4">
+<button class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-label font-semibold text-on-primary bg-gradient-to-br from-primary to-primary-container hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-surface transition-all transform active:scale-[0.99]" type="submit" style="">
+                                Secure Access
+                            </button>
+</div>
+</form>
+<!-- Recovery Action -->
+<div class="mt-8 text-center border-t border-outline-variant/10 pt-6">
+<a class="font-label text-sm font-medium text-primary hover:text-primary-container transition-colors inline-flex items-center group" href="#" style="">
+<span class="material-symbols-outlined text-sm mr-1 opacity-70 group-hover:opacity-100 transition-opacity" data-icon="security" style="">security</span>
+                            Recover Access
+                        </a>
+</div>
+</div>
+</div>
+<!-- Footer Compliance text -->
+<p class="text-center font-label text-xs text-on-surface-variant/70 mt-8 tracking-[0.05em]" style="">
+                Protected by Suraksha Shield Grade Encryption. <br> Unauthorized access is strictly prohibited.
+            </p>
+</div>
+</main>
+</body></html>

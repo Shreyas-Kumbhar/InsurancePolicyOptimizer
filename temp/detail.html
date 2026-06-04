@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Policy Detail - Suraksha Shield</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#42474f",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#0e5138",
+                        "on-secondary-container": "#316e52",
+                        "on-tertiary-fixed": "#00201c",
+                        "tertiary-fixed": "#8df5e4",
+                        "on-secondary-fixed": "#002114",
+                        "surface-container-highest": "#e1e2e7",
+                        "surface-container": "#ededf2",
+                        "on-surface": "#191c1f",
+                        "tertiary-container": "#005148",
+                        "tertiary": "#003832",
+                        "surface-tint": "#296195",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f9f9fe",
+                        "secondary-container": "#aeeecb",
+                        "secondary-fixed": "#b1f0ce",
+                        "surface": "#f9f9fe",
+                        "primary": "#003358",
+                        "primary-fixed-dim": "#9ccaff",
+                        "error-container": "#ffdad6",
+                        "outline": "#727780",
+                        "on-tertiary-fixed-variant": "#005048",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e1e2e7",
+                        "on-primary-fixed-variant": "#00497b",
+                        "on-primary-container": "#87baf3",
+                        "surface-container-low": "#f3f3f8",
+                        "surface-dim": "#d9dade",
+                        "inverse-on-surface": "#f0f0f5",
+                        "surface-container-high": "#e7e8ed",
+                        "inverse-surface": "#2e3034",
+                        "on-background": "#191c1f",
+                        "on-primary-fixed": "#001d35",
+                        "secondary-fixed-dim": "#95d4b3",
+                        "inverse-primary": "#9ccaff",
+                        "outline-variant": "#c1c7d0",
+                        "on-tertiary-container": "#5fc7b7",
+                        "tertiary-fixed-dim": "#70d8c8",
+                        "error": "#ba1a1a",
+                        "primary-container": "#004a7c",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#d0e4ff",
+                        "on-primary": "#ffffff",
+                        "background": "#f9f9fe",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#2c694e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Manrope', sans-serif; }
+        .glass-panel {
+            background: rgba(249, 249, 254, 0.8);
+            backdrop-filter: blur(24px);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #003358 0%, #004a7c 100%);
+            color: #ffffff;
+            border-radius: 0.5rem;
+            border: none;
+        }
+        .ambient-shadow {
+            box-shadow: 0 12px 40px rgba(25, 28, 31, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl docked full-width top-0 sticky shadow-sm dark:shadow-none z-50">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-sky-950 dark:text-white font-headline">Suraksha Shield</div>
+<nav class="hidden md:flex gap-6 font-manrope text-sm font-medium tracking-tight">
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-900 dark:hover:text-white transition-colors hover:bg-slate-50 dark:hover:bg-slate-900 duration-300 rounded px-3 py-2" href="#">Find a Policy</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-900 dark:hover:text-white transition-colors hover:bg-slate-50 dark:hover:bg-slate-900 duration-300 rounded px-3 py-2" href="#">How it Works</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-900 dark:hover:text-white transition-colors hover:bg-slate-50 dark:hover:bg-slate-900 duration-300 rounded px-3 py-2" href="#">Support</a>
+</nav>
+<div class="flex gap-4">
+<button class="text-sky-900 dark:text-sky-400 font-manrope text-sm font-medium tracking-tight hover:bg-slate-50 dark:hover:bg-slate-900 transition-all duration-300 rounded px-4 py-2">Log In</button>
+<button class="bg-primary text-on-primary font-manrope text-sm font-medium tracking-tight rounded-lg px-4 py-2 transition-transform duration-150 ease-in-out hover:scale-95">Get Started</button>
+</div>
+</div>
+<div class="bg-slate-100 dark:bg-slate-900 h-[1px] w-full"></div>
+</header>
+<main class="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8 py-12 space-y-12">
+<!-- Header Section -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-surface p-8 rounded-xl outline outline-1 outline-outline-variant/15 ambient-shadow">
+<div class="max-w-2xl">
+<span class="inline-block bg-surface-container-highest text-on-surface-variant text-label font-medium px-3 py-1 rounded-md mb-4 text-xs tracking-wider">COMPREHENSIVE HEALTH</span>
+<h1 class="text-4xl md:text-5xl font-extrabold text-on-background font-headline tracking-tight leading-tight mb-2">Optima Restore Comprehensive</h1>
+<p class="text-on-surface-variant font-body text-lg">Provided by HDFC ERGO General Insurance</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+<button class="px-6 py-3 bg-surface-container text-primary font-medium rounded-lg hover:bg-surface-container-high transition-colors text-center font-label">
+                    Save for Later
+                </button>
+<button class="px-8 py-3 btn-primary font-medium text-center font-label shadow-sm">
+                    Apply Now
+                </button>
+</div>
+</section>
+<!-- Bento Grid Layout for Details -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Primary Information -->
+<div class="lg:col-span-8 space-y-6">
+<!-- Coverage Overview -->
+<section class="bg-surface-container-lowest p-8 rounded-xl outline outline-1 outline-outline-variant/15">
+<h2 class="text-2xl font-bold font-headline mb-6 text-on-background">Coverage Overview</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+<div class="space-y-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary pt-1" data-icon="check_circle">check_circle</span>
+<div>
+<h4 class="font-semibold font-body text-on-background">Inpatient Care</h4>
+<p class="text-sm text-on-surface-variant font-label mt-1">100% covered after deductible. Includes semi-private room and board.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary pt-1" data-icon="check_circle">check_circle</span>
+<div>
+<h4 class="font-semibold font-body text-on-background">Outpatient Surgery</h4>
+<p class="text-sm text-on-surface-variant font-label mt-1">Covered at 80% in-network. Requires pre-authorization.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary pt-1" data-icon="check_circle">check_circle</span>
+<div>
+<h4 class="font-semibold font-body text-on-background">Prescription Drugs</h4>
+<p class="text-sm text-on-surface-variant font-label mt-1">Tiered copay structure: ₹500 / ₹1,500 / ₹2,500 based on formulary.</p>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline pt-1" data-icon="cancel">cancel</span>
+<div>
+<h4 class="font-semibold font-body text-on-background">Elective Cosmetic</h4>
+<p class="text-sm text-on-surface-variant font-label mt-1">Not covered under this policy structure.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-outline pt-1" data-icon="info">info</span>
+<div>
+<h4 class="font-semibold font-body text-on-background">Mental Health</h4>
+<p class="text-sm text-on-surface-variant font-label mt-1">Limited to 20 sessions per calendar year. 50% coinsurance.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Terms & Conditions Summary -->
+<section class="bg-surface-container-low p-8 rounded-xl">
+<h2 class="text-2xl font-bold font-headline mb-4 text-on-background">Terms &amp; Conditions</h2>
+<p class="text-on-surface-variant font-body mb-6">A summary of critical policy parameters. Full documentation is provided upon application initiation.</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="bg-surface-container-lowest p-4 rounded-lg outline outline-1 outline-outline-variant/15">
+<span class="text-xs text-on-surface-variant font-label uppercase tracking-wider block mb-1">Waiting Period</span>
+<span class="text-lg font-semibold text-on-background font-body">30 Days</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-lg outline outline-1 outline-outline-variant/15">
+<span class="text-xs text-on-surface-variant font-label uppercase tracking-wider block mb-1">Renewal Term</span>
+<span class="text-lg font-semibold text-on-background font-body">Annual (Auto)</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-lg outline outline-1 outline-outline-variant/15">
+<span class="text-xs text-on-surface-variant font-label uppercase tracking-wider block mb-1">Cancellation</span>
+<span class="text-lg font-semibold text-on-background font-body">Pro-rated</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Financials & Data -->
+<div class="lg:col-span-4 space-y-6">
+<!-- Premium & Fees Card -->
+<section class="bg-surface-container-lowest p-6 rounded-xl ambient-shadow outline outline-1 outline-outline-variant/15">
+<h3 class="text-xl font-bold font-headline mb-6 text-on-background">Premium &amp; Fees</h3>
+<div class="space-y-4 mb-6">
+<div class="flex justify-between items-baseline border-b border-outline-variant/20 pb-3">
+<span class="text-on-surface-variant font-body">Monthly Premium</span>
+<span class="text-2xl font-bold text-on-background font-headline">₹4,850<span class="text-sm font-normal text-on-surface-variant">.00</span></span>
+</div>
+<div class="flex justify-between items-baseline border-b border-outline-variant/20 pb-3">
+<span class="text-on-surface-variant font-body">Annual Deductible</span>
+<span class="text-lg font-medium text-on-background font-body">₹25,000</span>
+</div>
+<div class="flex justify-between items-baseline pb-1">
+<span class="text-on-surface-variant font-body">Out-of-Pocket Max</span>
+<span class="text-lg font-medium text-on-background font-body">₹75,000</span>
+</div>
+</div>
+<div class="bg-secondary-fixed p-4 rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-tertiary" data-icon="trending_down">trending_down</span>
+<div>
+<p class="text-sm font-semibold text-on-secondary-fixed font-body">Optimization Identified</p>
+<p class="text-xs text-on-secondary-fixed-variant mt-1 font-label">This premium is 12% lower than the market average for your demographic profile.</p>
+</div>
+</div>
+</section>
+<!-- Provider Information -->
+<section class="bg-surface-container p-6 rounded-xl">
+<h3 class="text-lg font-bold font-headline mb-4 text-on-background">Provider Trust Index</h3>
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 bg-surface-container-highest rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="corporate_fare">corporate_fare</span>
+</div>
+<div>
+<h4 class="font-semibold text-on-background font-body">HDFC ERGO</h4>
+<p class="text-xs text-on-surface-variant font-label">ICRA Rating: iAAA</p>
+</div>
+</div>
+<div class="space-y-2 text-sm font-label text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="phone">phone</span>
+<span>1800-2700-700</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="language">language</span>
+<span>hdfcergo.com</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="bg-slate-50 dark:bg-slate-950 w-full border-t border-slate-200 dark:border-slate-800 mt-auto">
+<div class="w-full py-12 px-8 flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
+<div class="text-lg font-bold text-sky-950 dark:text-white font-headline mb-4 md:mb-0">Suraksha Shield</div>
+<nav class="flex flex-wrap justify-center gap-4 md:gap-6 text-sky-900 dark:text-sky-400 font-inter text-xs text-slate-500 dark:text-slate-400">
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-900 dark:hover:text-white transition-colors ease-in-out transition-all" href="#">Terms of Service</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-900 dark:hover:text-white transition-colors ease-in-out transition-all" href="#">Privacy Policy</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-900 dark:hover:text-white transition-colors ease-in-out transition-all" href="#">Contact Us</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-900 dark:hover:text-white transition-colors ease-in-out transition-all" href="#">Regulatory Disclosure</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-900 dark:hover:text-white transition-colors ease-in-out transition-all" href="#">Accessibility</a>
+</nav>
+<div class="text-sky-900 dark:text-sky-400 font-inter text-xs text-slate-500 dark:text-slate-400 mt-4 md:mt-0">© 2024 Suraksha Shield. Secure. Optimized. Sovereign.</div>
+</div>
+</footer>
+</body></html>
