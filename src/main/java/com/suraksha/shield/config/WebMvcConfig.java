@@ -1,6 +1,7 @@
 package com.suraksha.shield.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -8,20 +9,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Serve all static files from /static/
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/");
+    }
+
+    @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/").setViewName("forward:/index.html");
-        registry.addViewController("/login").setViewName("forward:/login.html");
-        registry.addViewController("/register").setViewName("forward:/register.html");
-        registry.addViewController("/profile").setViewName("forward:/profile.html");
-        registry.addViewController("/policies").setViewName("forward:/policies/config.html");
-        
-        // Register results path before path variable pattern to avoid collisions
-        registry.addViewController("/policies/results").setViewName("forward:/policies/results.html");
-        registry.addViewController("/policies/{id}").setViewName("forward:/policies/detail.html");
-        
-        registry.addViewController("/admin/login").setViewName("forward:/admin/login.html");
-        registry.addViewController("/admin/dashboard").setViewName("forward:/admin/dashboard.html");
-        registry.addViewController("/admin/policies/new").setViewName("forward:/admin/newPolicy.html");
-        registry.addViewController("/admin/policies/{id}/edit").setViewName("forward:/admin/editPolicy.html");
+        // Map clean URLs to static HTML files using redirect
+        registry.addRedirectViewController("/login", "/login.html");
+        registry.addRedirectViewController("/register", "/register.html");
+        registry.addRedirectViewController("/profile", "/profile.html");
+        registry.addRedirectViewController("/policies", "/policies/config.html");
+        registry.addRedirectViewController("/policies/results", "/policies/results.html");
+        registry.addRedirectViewController("/admin/login", "/admin/login.html");
+        registry.addRedirectViewController("/admin/dashboard", "/admin/dashboard.html");
+        registry.addRedirectViewController("/admin/policies/new", "/admin/newPolicy.html");
     }
 }
