@@ -17,14 +17,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        // Map clean URLs to static HTML files using redirect
-        registry.addRedirectViewController("/login", "/login.html");
-        registry.addRedirectViewController("/register", "/register.html");
-        registry.addRedirectViewController("/profile", "/profile.html");
-        registry.addRedirectViewController("/policies", "/policies/config.html");
-        registry.addRedirectViewController("/policies/results", "/policies/results.html");
-        registry.addRedirectViewController("/admin/login", "/admin/login.html");
-        registry.addRedirectViewController("/admin/dashboard", "/admin/dashboard.html");
-        registry.addRedirectViewController("/admin/policies/new", "/admin/newPolicy.html");
+        // Map clean URLs to static HTML files using forward (keeps URLs clean)
+        registry.addViewController("/").setViewName("forward:/index.html");
+        registry.addViewController("/login").setViewName("forward:/login.html");
+        registry.addViewController("/register").setViewName("forward:/register.html");
+        registry.addViewController("/profile").setViewName("forward:/profile.html");
+        registry.addViewController("/policies").setViewName("forward:/policies/config.html");
+        registry.addViewController("/policies/results").setViewName("forward:/policies/results.html");
+        registry.addViewController("/admin/login").setViewName("forward:/admin/login.html");
+        registry.addViewController("/admin/dashboard").setViewName("forward:/admin/dashboard.html");
+        registry.addViewController("/admin/policies/new").setViewName("forward:/admin/newPolicy.html");
     }
 }

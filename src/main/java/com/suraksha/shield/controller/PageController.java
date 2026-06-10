@@ -6,18 +6,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * Serves static HTML pages for clean URL routing.
- * Uses redirect instead of forward to avoid InternalResourceView resolution errors.
+ * Uses forward with numeric regex to avoid redirect loops and path variable parsing issues.
  */
 @Controller
 public class PageController {
 
-    @GetMapping("/policies/{id}")
+    @GetMapping("/policies/{id:\\d+}")
     public String policyDetail(@PathVariable String id) {
-        return "redirect:/policies/detail.html";
+        return "forward:/policies/detail.html";
     }
 
-    @GetMapping("/admin/policies/{id}/edit")
+    @GetMapping("/admin/policies/{id:\\d+}/edit")
     public String editPolicy(@PathVariable String id) {
-        return "redirect:/admin/editPolicy.html";
+        return "forward:/admin/editPolicy.html";
     }
 }
