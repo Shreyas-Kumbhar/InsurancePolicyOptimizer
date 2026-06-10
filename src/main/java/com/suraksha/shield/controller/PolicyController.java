@@ -37,7 +37,15 @@ public class PolicyController {
             @RequestParam(name = "riskLevel", required = false) String riskLevel,
             @RequestParam(name = "max_premium", required = false) Integer maxPremium,
             @RequestParam(name = "coverage_min", required = false) Integer coverageMin,
-            @RequestParam(name = "coverage_max", required = false) Integer coverageMax) {
+            @RequestParam(name = "coverage_max", required = false) Integer coverageMax,
+            @RequestParam(name = "show_all", required = false) Boolean showAll) {
+
+        if (showAll != null && showAll) {
+            java.util.List<Policy> all = policyService.getAllPolicies();
+            all.sort(java.util.Comparator.comparingInt(Policy::getPremium));
+            PolicyOptimizationResult result = new PolicyOptimizationResult(all, false, 0, 0);
+            return ResponseEntity.ok(result);
+        }
 
         PolicyOptimizationResult result = policyService.optimize(type, riskLevel, name, maxPremium, coverageMin, coverageMax);
         return ResponseEntity.ok(result);
