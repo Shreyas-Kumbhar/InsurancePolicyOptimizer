@@ -130,8 +130,24 @@ public class AuthController {
 
         userRepository.save(user);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "User registered successfully!");
-        return ResponseEntity.ok(response);
+        // Authenticate the newly registered user to auto-login
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        registerRequest.getEmail(),
+                        registerRequest.getPassword()
+                )
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.generateToken(authentication);
+
+        return ResponseEntity.ok(new JwtResponse(
+                jwt,
+                user.getId(),
+                user.getEmail(),
+                "USER",
+                user.getFirstName(),
+                user.getLastName()
+        ));
     }
 }
