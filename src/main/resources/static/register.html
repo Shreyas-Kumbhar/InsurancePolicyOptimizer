@@ -98,9 +98,11 @@
                         throw new Error(data.message || 'Registration failed.');
                     }
 
-                    // Success! Redirect to login with a message
-                    sessionStorage.setItem('flash_success', 'Registration successful! Please login.');
-                    window.location.href = '/login';
+                    // Save auth response and auto-login
+                    saveAuth(data);
+                    
+                    // Redirect directly to policies dashboard
+                    window.location.href = '/policies';
                 } catch (err) {
                     errorPlaceholder.innerHTML = `
                         <div class="alert alert-danger d-flex align-items-center" role="alert">

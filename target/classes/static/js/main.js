@@ -88,6 +88,19 @@ function renderNavbar() {
     const user = getUserInfo();
 
     let navRightContent = '';
+    let navLeftContent = '';
+    
+    // Hide optimization module for Admins
+    if (role !== 'ADMIN') {
+        navLeftContent = `
+            <li class="nav-item">
+                <a class="nav-link" href="/policies">Find a Policy</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/#how-it-works">How it Works</a>
+            </li>
+        `;
+    }
     
     if (token) {
         if (role === 'ADMIN') {
@@ -118,12 +131,7 @@ function renderNavbar() {
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-medium">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/policies">Find a Policy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/#how-it-works">How it Works</a>
-                        </li>
+                        ${navLeftContent}
                     </ul>
                     <div class="d-flex align-items-center gap-3">
                         ${navRightContent}
