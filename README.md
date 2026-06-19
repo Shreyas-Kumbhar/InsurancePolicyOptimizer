@@ -224,10 +224,45 @@ The API returns a `PolicyOptimizationResult` object containing:
 ---
 
 ## 26. Screenshots Section
-*(Placeholders for future screenshots)*
-| Login Interface | Optimization Results | Admin Dashboard |
+*(Placeholders for future screenshots. Replace the image links with your actual file paths once uploaded.)*
+
+### 1. Home / Dashboard
+*Features: Get Started, View Demo, Show All Policies*
+![Home Dashboard](https://via.placeholder.com/800x400.png?text=Home+Dashboard)
+
+### 2. Authentication (Register & Login)
+*Includes 4 screens: User Login, User Register, Admin Login, Admin Register*
+| User Login | User Register | Admin Login | Admin Register |
+|:---:|:---:|:---:|:---:|
+| ![User Login](https://via.placeholder.com/200x150.png?text=User+Login) | ![User Register](https://via.placeholder.com/200x150.png?text=User+Register) | ![Admin Login](https://via.placeholder.com/200x150.png?text=Admin+Login) | ![Admin Register](https://via.placeholder.com/200x150.png?text=Admin+Register) |
+
+### 3. Post-Login Dashboard
+*Features: Get Started, Show All Policies, View Demo, My Profile*
+![Post-Login Dashboard](https://via.placeholder.com/800x400.png?text=Post-Login+Dashboard)
+
+### 4. Optimization Module (Type Selection)
+*Selecting the type of insurance (3 screens: Life, Health, Car)*
+| Life Insurance | Health Insurance | Car Insurance |
 |:---:|:---:|:---:|
-| ![Login Placeholder](https://via.placeholder.com/300x200.png?text=Login+Screen) | ![Results Placeholder](https://via.placeholder.com/300x200.png?text=Optimization+Results) | ![Dashboard Placeholder](https://via.placeholder.com/300x200.png?text=Admin+Dashboard) |
+| ![Life Insurance](https://via.placeholder.com/250x150.png?text=Life+Insurance) | ![Health Insurance](https://via.placeholder.com/250x150.png?text=Health+Insurance) | ![Car Insurance](https://via.placeholder.com/250x150.png?text=Car+Insurance) |
+
+### 5. Optimization Results
+*Results corresponding to each insurance type (3 screens)*
+| Life Results | Health Results | Car Results |
+|:---:|:---:|:---:|
+| ![Life Results](https://via.placeholder.com/250x150.png?text=Life+Results) | ![Health Results](https://via.placeholder.com/250x150.png?text=Health+Results) | ![Car Results](https://via.placeholder.com/250x150.png?text=Car+Results) |
+
+### 6. Policy Details & Allocation
+*Viewing the details of the resulting policies and allocating them to the user.*
+![Policy Details](https://via.placeholder.com/800x400.png?text=Policy+Details+and+Allocation)
+
+### 7. My Profile (Post-Allocation)
+*Viewing the user profile after policies have been successfully allocated.*
+![My Profile](https://via.placeholder.com/800x400.png?text=My+Profile)
+
+### 8. Logout Screen
+*The screen displayed after the user successfully logs out.*
+![Logout Screen](https://via.placeholder.com/800x400.png?text=Logout+Screen)
 
 ---
 
