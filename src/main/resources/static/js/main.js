@@ -8,42 +8,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Authentication LocalStorage Helpers
 function getToken() {
-    return localStorage.getItem('jwt_token');
+    return sessionStorage.getItem('jwt_token');
 }
 
 function getRole() {
-    return localStorage.getItem('user_role'); // 'USER' or 'ADMIN'
+    return sessionStorage.getItem('user_role'); // 'USER' or 'ADMIN'
 }
 
 function getUserInfo() {
     return {
-        id: localStorage.getItem('user_id'),
-        email: localStorage.getItem('user_email'),
-        firstName: localStorage.getItem('user_firstName'),
-        lastName: localStorage.getItem('user_lastName')
+        id: sessionStorage.getItem('user_id'),
+        email: sessionStorage.getItem('user_email'),
+        firstName: sessionStorage.getItem('user_firstName'),
+        lastName: sessionStorage.getItem('user_lastName')
     };
 }
 
 function saveAuth(jwtResponse) {
-    localStorage.setItem('jwt_token', jwtResponse.token);
-    localStorage.setItem('user_id', jwtResponse.id);
-    localStorage.setItem('user_email', jwtResponse.email);
-    localStorage.setItem('user_role', jwtResponse.role);
+    sessionStorage.setItem('jwt_token', jwtResponse.token);
+    sessionStorage.setItem('user_id', jwtResponse.id);
+    sessionStorage.setItem('user_email', jwtResponse.email);
+    sessionStorage.setItem('user_role', jwtResponse.role);
     if (jwtResponse.firstName) {
-        localStorage.setItem('user_firstName', jwtResponse.firstName);
+        sessionStorage.setItem('user_firstName', jwtResponse.firstName);
     }
     if (jwtResponse.lastName) {
-        localStorage.setItem('user_lastName', jwtResponse.lastName);
+        sessionStorage.setItem('user_lastName', jwtResponse.lastName);
     }
 }
 
 function clearAuth() {
-    localStorage.removeItem('jwt_token');
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('user_email');
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('user_firstName');
-    localStorage.removeItem('user_lastName');
+    sessionStorage.removeItem('jwt_token');
+    sessionStorage.removeItem('user_id');
+    sessionStorage.removeItem('user_email');
+    sessionStorage.removeItem('user_role');
+    sessionStorage.removeItem('user_firstName');
+    sessionStorage.removeItem('user_lastName');
 }
 
 function logout() {
@@ -55,26 +55,26 @@ function logout() {
 async function fetchWithAuth(url, options = {}) {
     const token = getToken();
     const headers = options.headers || {};
-    
+
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     // Set default Content-Type to application/json if sending body and not multipart
     if (options.body && !(options.body instanceof FormData) && !headers['Content-Type']) {
         headers['Content-Type'] = 'application/json';
     }
-    
+
     options.headers = headers;
-    
+
     const response = await fetch(url, options);
-    
+
     if (response.status === 401 || response.status === 403) {
         // Token expired or invalid, redirect to login
         clearAuth();
         window.location.href = '/login';
     }
-    
+
     return response;
 }
 
@@ -89,7 +89,7 @@ function renderNavbar() {
 
     let navRightContent = '';
     let navLeftContent = '';
-    
+
     // Hide optimization module for Admins
     if (role !== 'ADMIN') {
         navLeftContent = `
@@ -101,7 +101,7 @@ function renderNavbar() {
             </li>
         `;
     }
-    
+
     if (token) {
         if (role === 'ADMIN') {
             navRightContent = `

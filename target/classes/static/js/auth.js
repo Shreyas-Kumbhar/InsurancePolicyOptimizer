@@ -1,27 +1,27 @@
 // Authentication management utilities
 
 const auth = {
-    getToken: () => localStorage.getItem('jwt_token'),
-    getRole: () => localStorage.getItem('user_role'),
-    getEmail: () => localStorage.getItem('user_email'),
-    getName: () => localStorage.getItem('user_name'),
+    getToken: () => sessionStorage.getItem('jwt_token'),
+    getRole: () => sessionStorage.getItem('user_role'),
+    getEmail: () => sessionStorage.getItem('user_email'),
+    getName: () => sessionStorage.getItem('user_name'),
     
     setSession: (token, role, email, firstName, lastName) => {
-        localStorage.setItem('jwt_token', token);
-        localStorage.setItem('user_role', role);
-        localStorage.setItem('user_email', email);
+        sessionStorage.setItem('jwt_token', token);
+        sessionStorage.setItem('user_role', role);
+        sessionStorage.setItem('user_email', email);
         if (firstName && lastName) {
-            localStorage.setItem('user_name', `${firstName} ${lastName}`);
+            sessionStorage.setItem('user_name', `${firstName} ${lastName}`);
         } else {
-            localStorage.removeItem('user_name');
+            sessionStorage.removeItem('user_name');
         }
     },
     
     clearSession: () => {
-        localStorage.removeItem('jwt_token');
-        localStorage.removeItem('user_role');
-        localStorage.removeItem('user_email');
-        localStorage.removeItem('user_name');
+        sessionStorage.removeItem('jwt_token');
+        sessionStorage.removeItem('user_role');
+        sessionStorage.removeItem('user_email');
+        sessionStorage.removeItem('user_name');
     },
     
     isAuthenticated: () => {
