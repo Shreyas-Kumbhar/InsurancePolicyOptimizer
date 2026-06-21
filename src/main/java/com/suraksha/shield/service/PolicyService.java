@@ -8,6 +8,10 @@ import com.suraksha.shield.exception.ResourceNotFoundException;
 import com.suraksha.shield.repository.PolicyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,7 +24,12 @@ public class PolicyService {
     private PolicyRepository policyRepository;
 
     public List<Policy> getAllPolicies() {
-        return policyRepository.findAll();
+        return policyRepository.findTop100Policies();
+    }
+
+    public Page<Policy> getPaginatedPolicies(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return policyRepository.findAll(pageable);
     }
 
     public Policy getPolicyById(Long id) {

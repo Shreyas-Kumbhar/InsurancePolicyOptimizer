@@ -11,4 +11,7 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
     List<Policy> findByTypeIgnoreCase(String type);
     List<Policy> findByRiskLevelIgnoreCase(String riskLevel);
     List<Policy> findByTypeIgnoreCaseAndRiskLevelIgnoreCase(String type, String riskLevel);
+    
+    @org.springframework.data.jpa.repository.Query(value = "SELECT * FROM policies ORDER BY id DESC LIMIT 100", nativeQuery = true)
+    List<Policy> findTop100Policies();
 }
