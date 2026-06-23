@@ -31,6 +31,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
 
+
         // 1. Seed Admin User
         Admin admin = null;
         if (adminRepository.count() == 0) {
