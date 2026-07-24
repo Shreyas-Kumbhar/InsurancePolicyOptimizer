@@ -463,21 +463,21 @@ The app seeds an admin account and 35 sample policies automatically on first sta
 ### ⚙️ Policy Configuration
 > Users set optimization parameters — coverage range, max annual premium, policy type, and risk level — before running the engine.
 
-![Policy Configuration](src/main/resources/static/screenshots/policy-config.png)
+![Policy Configuration](src/main/resources/static/screenshots/policies-config.png)
 
 ---
 
 ### 🎯 Optimal Policy Combination
 > The backtracking engine returns the most cost-efficient combination. Example: ₹1,50,000 coverage for just ₹3,000/yr (Low Risk · Health).
 
-![Optimization Results](src/main/resources/static/screenshots/policy-results.png)
+![Optimization Results](src/main/resources/static/screenshots/policies-results.png)
 
 ---
 
 ### 📋 All Policies — Search Results
 > Browse all policies in a responsive card grid with premium, coverage, type, and risk profile at a glance.
 
-![Search Results](src/main/resources/static/screenshots/search-results.png)
+![Search Results](src/main/resources/static/screenshots/all-policies.png)
 
 ---
 
@@ -491,7 +491,7 @@ The app seeds an admin account and 35 sample policies automatically on first sta
 ### 👤 User Dashboard
 > Personal dashboard showing profile info and all allocated policies with premium and coverage badges.
 
-![User Dashboard](src/main/resources/static/screenshots/user-dashboard.png)
+![User Dashboard](src/main/resources/static/screenshots/user-profile.png)
 
 ---
 
@@ -505,7 +505,7 @@ The app seeds an admin account and 35 sample policies automatically on first sta
 ### ➕ Add New Policy
 > Admin form to create a policy — name, provider, type, risk level, premium, and coverage.
 
-![Add New Policy](src/main/resources/static/screenshots/admin-new-policy.png)
+![Add New Policy](src/main/resources/static/screenshots/admin-add-policy.png)
 
 ---
 
@@ -526,7 +526,7 @@ The app seeds an admin account and 35 sample policies automatically on first sta
 ### 📊 Import Kaggle CSV
 > Import directly from Kaggle dataset format (semicolon-separated). Server auto-maps Kaggle columns (`POLICY TYPE 1`, `Premium`, `BENEFIT`, `SUBSTANDARD RISK`, `CHANNEL1`) to the project schema.
 
-![Import Kaggle CSV](src/main/resources/static/screenshots/admin-import-kaggle.png)
+![Import Kaggle CSV](src/main/resources/static/screenshots/admin-import-kaggle-csv.png)
 
 ---
 
