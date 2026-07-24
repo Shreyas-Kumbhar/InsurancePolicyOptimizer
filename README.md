@@ -1,381 +1,98 @@
-<div align="center">
+# Suraksha Shield - Insurance Policy Optimizer
 
-# 🛡️ Insurance Policy Selection Optimizer
+Suraksha Shield is a Full-Stack Spring Boot application designed to help users find the optimal combination of insurance policies based on their specific constraints (e.g., maximum premium they can pay and minimum coverage they need). It leverages a Backtracking Algorithm to evaluate combinations of policies to minimize the overall premium cost while meeting coverage requirements.
 
-[![Java](https://img.shields.io/badge/Java-17-orange.svg?style=for-the-badge&logo=java)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.2.5-brightgreen.svg?style=for-the-badge&logo=spring)](https://spring.io/projects/spring-boot)
-[![MySQL](https://img.shields.io/badge/MySQL-Database-blue.svg?style=for-the-badge&logo=mysql)](https://www.mysql.com/)
-[![JWT](https://img.shields.io/badge/JWT-Authentication-black.svg?style=for-the-badge&logo=json-web-tokens)](https://jwt.io/)
-[![Status](https://img.shields.io/badge/Status-Active-success.svg?style=for-the-badge)](#49-project-status)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](#42-license-section)
+## Table of Contents
+- [Technologies Used](#technologies-used)
+- [Project Structure and Java Code Explanation](#project-structure-and-java-code-explanation)
+  - [1. Entities (`com.suraksha.shield.entity`)](#1-entities)
+  - [2. Services (`com.suraksha.shield.service`)](#2-services)
+  - [3. Controllers (`com.suraksha.shield.controller`)](#3-controllers)
+  - [4. Security & Configuration (`com.suraksha.shield.config`)](#4-security--configuration)
+  - [5. Repositories (`com.suraksha.shield.repository`)](#5-repositories)
+  - [6. DTOs (Data Transfer Objects) (`com.suraksha.shield.dto`)](#6-dtos)
+- [How the Optimization Engine Works](#how-the-optimization-engine-works)
+- [How to Run](#how-to-run)
 
-![Project Banner](https://via.placeholder.com/1200x300.png?text=Insurance+Policy+Selection+Optimizer)
-
-**A powerful, algorithm-driven InsurTech platform to help users select the most optimal insurance policies.**
-
-</div>
-
----
-
-<details>
-<summary><b>Table of Contents (Click to expand)</b></summary>
-
-1. [Project Description](#3-project-description)
-2. [Problem Statement](#4-problem-statement)
-3. [Solution Overview](#5-solution-overview)
-4. [Key Features](#6-key-features)
-5. [Project Objectives](#7-project-objectives)
-6. [System Architecture Overview](#8-system-architecture-overview)
-7. [Technology Stack](#9-technology-stack)
-8. [Database Information](#12-database-information)
-9. [Project Workflow](#13-project-workflow)
-10. [Algorithm/Optimization Logic Used](#14-algorithmoptimization-logic-used)
-11. [Folder Structure](#15-folder-structure)
-12. [Installation Guide](#16-installation-guide)
-13. [API Documentation](#23-api-documentation)
-14. [Screenshots](#26-screenshots-section)
-15. [Testing Strategy](#33-testing-strategy)
-16. [Author Information](#43-author-information)
-
-</details>
+## Technologies Used
+- **Java 17**
+- **Spring Boot 3.2.5** (Web, Data JPA, Security, Validation)
+- **MySQL Database**
+- **JSON Web Tokens (JWT)** for authentication
+- **Maven** for build and dependency management
 
 ---
 
-## 3. Project Description
-The **Insurance Policy Selection Optimizer** (internally known as *Suraksha Shield*) is an advanced backend system tailored for the InsurTech domain. It assists users, insurance brokers, and administrators in managing, comparing, and ultimately selecting the most suitable insurance policies. Through its robust API and custom optimization engine, the platform processes complex customer parameters to recommend policy combinations that maximize coverage while strictly adhering to premium budgets.
+## Project Structure and Java Code Explanation
 
-## 4. Problem Statement
-Choosing the right insurance policy is overwhelmingly complex for the average consumer. Customers must balance high premiums against sufficient coverage, while navigating endless policy types, risk levels, and provider reputations. Without intelligent tooling, consumers often end up overpaying for redundant coverage or under-insuring themselves against critical risks.
+The project follows a standard layered architecture typical for Spring Boot applications:
 
-## 5. Solution Overview
-This project provides a programmatic solution by introducing an **Optimization Engine** powered by a recursive backtracking algorithm. Instead of presenting a static list of policies, the system accepts a user's absolute maximum budget and minimum coverage requirements, mathematically evaluating thousands of potential policy combinations to return the most cost-effective and comprehensive coverage plan available.
+### 1. Entities (`com.suraksha.shield.entity`)
+Entities map directly to database tables using JPA (Hibernate).
+*   **`Policy.java`**: Represents an insurance policy. It contains details such as `name`, `type`, `premium` (cost), `coverage` (benefit amount), `riskLevel`, and `provider`. It also has a Many-to-One relationship with the `Admin` who created it.
+*   **`User.java`**: Represents a standard user in the system. Users have attributes like `email`, `password`, and a list of `allocatedPolicies` (policies they have chosen).
+*   **`Admin.java`**: Represents an administrator user. Admins can create and manage policies in the system.
 
-## 6. Key Features
-- **Intelligent Policy Optimization:** Algorithmically calculates the best combination of policies based on user constraints.
-- **Role-Based Access Control (RBAC):** Distinct administrative and standard user privileges securely enforced.
-- **JWT Authentication:** Stateless, secure API access using JSON Web Tokens.
-- **Full CRUD Operations:** Comprehensive management of policies, users, and admin profiles.
-- **Dynamic Filtering:** Search policies by risk level, provider, name, and type.
-- **Automated Database Seeding:** Instant environment setup with pre-populated dummy data for testing.
+### 2. Services (`com.suraksha.shield.service`)
+Services contain the core business logic of the application.
+*   **`PolicyService.java`**: The core component of this application. It provides CRUD operations (Create, Read, Update, Delete) for `Policy` entities. Crucially, it houses the `optimize()` method which implements the **Backtracking Algorithm** to find the optimal combination of policies.
+*   **`CustomUserDetailsService.java`**: Implements Spring Security's `UserDetailsService`. It loads user-specific data from the database (checking both `User` and `Admin` repositories) to facilitate the authentication process.
 
-## 7. Project Objectives
-- To simplify the insurance selection process for end-users.
-- To demonstrate complex algorithmic problem-solving within a modern web framework.
-- To provide a scalable, secure, and easily extensible backend architecture for future InsurTech applications.
+### 3. Controllers (`com.suraksha.shield.controller`)
+Controllers handle incoming HTTP requests and return HTTP responses, acting as the bridge between the frontend and backend.
+*   **`PolicyController.java`**: Exposes endpoints for users to search for policies (`/api/policies/results`), view specific policy details (`/api/policies/{id}`), and allocate a policy to their profile (`/api/policies/{id}/allocate`).
+*   **`AuthController.java`**: Manages user authentication and registration. It provides endpoints like `/api/auth/login` (which returns a JWT) and `/api/auth/register`.
+*   **`AdminController.java`**: Secured endpoints intended only for Admins to add, edit, and delete policies.
+*   **`UserController.java`**: Endpoints for standard users to fetch their profile details and view the policies they have been allocated.
+*   **`PageController.java`**: Responsible for routing and serving static HTML views.
 
----
+### 4. Security & Configuration (`com.suraksha.shield.config`)
+Manages application security, JWT validation, and general setup.
+*   **`SecurityConfig.java`**: Configures Spring Security. It disables CSRF, sets session management to stateless (since we use JWTs), and defines which endpoints are public (like login/register) and which require authentication or specific roles (like Admin endpoints).
+*   **`JwtTokenProvider.java`**: Utility class used to generate, parse, and validate JSON Web Tokens.
+*   **`JwtAuthenticationFilter.java`**: A filter that runs once per request. It intercepts HTTP requests, extracts the JWT from the `Authorization` header, validates it, and sets the authenticated user in the `SecurityContext`.
+*   **`DatabaseSeeder.java`**: An initialization component that seeds the database with initial Admin accounts or default policies when the application starts.
 
-## 8. System Architecture Overview
+### 5. Repositories (`com.suraksha.shield.repository`)
+Interfaces extending Spring Data JPA's `JpaRepository`. They provide out-of-the-box methods for database operations (save, find, delete) without needing to write boilerplate SQL queries.
+*   **`PolicyRepository.java`**: Handles data access for policies. It includes custom methods to filter policies by type, risk level, or name.
+*   **`UserRepository.java`** & **`AdminRepository.java`**: Handle data access for users and admins respectively (e.g., finding a user by their email).
 
-The system follows a classic Multi-Tier Architecture (Controller-Service-Repository pattern):
-
-```mermaid
-graph TD
-    Client[Client / Frontend] -->|HTTP Requests| Controller[Controllers\nAuthController, PolicyController]
-    Controller -->|DTOs| Service[Services\nPolicyService, UserDetailsService]
-    Service -->|Entities| Repository[Repositories\nSpring Data JPA]
-    Repository -->|SQL Queries| DB[(MySQL Database)]
-    
-    subgraph Security Layer
-        JWT[JWT Authentication Filter] -.-> Controller
-    end
-```
-
-## 9. Technology Stack
-Our stack is chosen for enterprise-grade reliability, security, and developer productivity.
-
-## 10. Programming Languages Used
-- **Java 17**: Utilizing the latest LTS features like Records and Pattern Matching where applicable.
-
-## 11. Frameworks and Libraries Used
-- **Spring Boot 3.2.5**: Core framework for rapid application development.
-- **Spring Web (MVC)**: For building RESTful web services.
-- **Spring Data JPA**: For seamless ORM and database interactions.
-- **Spring Security**: For robust application-level security.
-- **JJWT (0.11.5)**: For generating and parsing JSON Web Tokens.
-- **Maven**: Dependency management and build automation.
-
-## 12. Database Information
-- **Database:** MySQL
-- **Driver:** `mysql-connector-j`
-- **ORM:** Hibernate (via Spring Data JPA)
+### 6. DTOs (Data Transfer Objects) (`com.suraksha.shield.dto`)
+Simple Java classes used to transfer data between layers (usually between Controller and Service, or as API requests/responses) without exposing database entities directly. Examples include `LoginRequest`, `RegisterRequest`, and `PolicyOptimizationResult`.
 
 ---
 
-## 13. Project Workflow
+## How the Optimization Engine Works
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant AuthController
-    participant PolicyController
-    participant PolicyService
-    participant Database
+The standout feature of this application is the policy optimizer located in `PolicyService.java`. It solves a variation of the Knapsack Problem.
 
-    User->>AuthController: POST /api/auth/login
-    AuthController-->>User: Returns JWT Token
-    User->>PolicyController: GET /api/policies/optimize (with JWT)
-    PolicyController->>PolicyService: trigger optimization(budget, coverage)
-    PolicyService->>Database: Fetch matching policies
-    Database-->>PolicyService: List<Policy>
-    PolicyService->>PolicyService: Execute Backtracking Algorithm
-    PolicyService-->>PolicyController: PolicyOptimizationResult
-    PolicyController-->>User: JSON Response (Best Policies)
-```
+**The Goal**: Find a combination of policies where the total coverage is $\ge$ `coverageMin`, and the total premium is $\le$ `maxPremium`, such that the overall premium paid is strictly minimized.
 
-## 14. Algorithm/Optimization Logic Used
-The core of this project is the **Backtracking Optimization Algorithm** housed in the `PolicyService`. 
-
-**How it works:**
-The algorithm recursively evaluates all valid combinations (subsets) of filtered insurance policies. For each policy, it branches into two decisions:
-1. **Include** the policy (if it doesn't exceed the `maxPremium` budget).
-2. **Exclude** the policy.
-
-As it traverses the decision tree, it keeps track of the combination that meets the `coverageMin` requirement while resulting in the absolute lowest combined premium. Once the recursion tree is fully traversed, the mathematically proven optimal combination is returned.
+**The Algorithm (Backtracking)**:
+1.  **Filtering**: First, the system filters all available policies in the database based on the user's selected `type` and `riskLevel`.
+2.  **Backtracking (`backtrack` method)**: The algorithm recursively explores all possible combinations of the filtered policies.
+    *   For every policy in the list, the algorithm makes a choice: **Include** it in the current combination or **Exclude** it.
+    *   It keeps a running total of `currentPremium` and `currentCoverage`.
+    *   **Pruning**: If adding a policy exceeds the `maxPremium`, that path is immediately abandoned (pruned).
+    *   **Evaluating**: Whenever a valid combination is found (Coverage $\ge$ Minimum Required && Premium $\le$ Maximum Allowed), it checks if this combination's premium is lower than the best premium found so far. If it is, this becomes the new `bestCombination`.
+3.  **Result**: After exploring the possibilities, it returns a `PolicyOptimizationResult` containing the optimal list of policies, the total premium cost, and the total coverage achieved.
 
 ---
 
-## 15. Folder Structure
+## How to Run
+1.  Ensure you have **Java 17** and **MySQL** installed.
+2.  Create a MySQL database (check `application.properties` for the exact database name, username, and password required).
+3.  Navigate to the project root directory in your terminal.
+4.  Run the application using the Maven wrapper:
+    ```bash
+    ./mvnw spring-boot:run
+    ```
+5.  The application will start, usually on `http://localhost:8080`.
 
-```text
-InsurancePolicyOptimizer/
-├── src/
-│   ├── main/java/com/suraksha/shield/
-│   │   ├── config/          # Security, JWT, and DB Seeder configurations
-│   │   ├── controller/      # REST API Endpoints (Auth, Policy, Admin, User)
-│   │   ├── dto/             # Data Transfer Objects for API payloads
-│   │   ├── entity/          # JPA Entities (User, Admin, Policy)
-│   │   ├── exception/       # Global exception handlers
-│   │   ├── repository/      # Spring Data JPA Interfaces
-│   │   └── service/         # Business logic and Optimization algorithms
-│   └── test/                # Unit and Integration Tests
-├── pom.xml                  # Maven dependencies
-└── README.md                # Project documentation
-```
 
----
+Copyright © 2026 Shreyas Kumbhar.
+All rights reserved.
 
-## 16. Installation Guide
-
-### 17. Prerequisites
-- **Java Development Kit (JDK) 17** or higher.
-- **Maven 3.8+** installed.
-- **MySQL 8.0+** server running locally or remotely.
-- **Git** (for version control).
-
-### 18. Environment Setup
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Shreyas-Kumbhar/InsurancePolicyOptimizer.git
-   cd InsurancePolicyOptimizer
-   ```
-2. Create a new MySQL database named `suraksha_db` (or whatever is defined in your properties).
-
-### 19. Configuration Steps
-Update your `src/main/resources/application.properties` with your database credentials:
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/suraksha_db
-spring.datasource.username=root
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
-```
-
-### 20. Running the Project Locally
-Run the Spring Boot application using Maven:
-```bash
-mvn spring-boot:run
-```
-The server will start on `http://localhost:8080`.
-
-### 21. Build Instructions
-To create an executable JAR file for production:
-```bash
-mvn clean install
-```
-The compiled JAR will be located in the `target/` directory.
-
-### 22. Deployment Instructions
-*(Currently configured for local/Docker deployment. For cloud environments like AWS EC2 or Heroku, push the JAR file and ensure environment variables for database connections are securely set).*
-
----
-
-## 23. API Documentation (if applicable)
-*Endpoints are protected via JWT. Include `Authorization: Bearer <token>` in headers.*
-
-| Method | Endpoint | Description | Role Required |
-|--------|----------|-------------|---------------|
-| POST | `/api/auth/login` | Authenticate and get JWT | None |
-| GET | `/api/policies` | Get all policies | USER/ADMIN |
-| POST | `/api/policies` | Create a new policy | ADMIN |
-| GET | `/api/policies/optimize` | Run optimization engine | USER/ADMIN |
-
-### 24. Input Parameters (Optimization Endpoint)
-- `maxPremium` (Integer): Maximum affordable budget.
-- `coverageMin` (Integer): Minimum required coverage.
-- `type` (String, Optional): specific policy type (e.g., Health, Life).
-
-### 25. Output Results
-The API returns a `PolicyOptimizationResult` object containing:
-- `isOptimized` (Boolean)
-- `totalPremium` (Integer)
-- `totalCoverage` (Integer)
-- `recommendedPolicies` (Array of Policy objects)
-
----
-
-## 26. Screenshots Section
-*(Placeholders for future screenshots. Replace the image links with your actual file paths once uploaded.)*
-
-### 1. Home / Dashboard
-*Features: Get Started, View Demo, Show All Policies*
-![Home Dashboard](https://via.placeholder.com/800x400.png?text=Home+Dashboard)
-
-### 2. Authentication (Register & Login)
-*Includes 4 screens: User Login, User Register, Admin Login, Admin Register*
-| User Login | User Register | Admin Login | Admin Register |
-|:---:|:---:|:---:|:---:|
-| ![User Login](https://via.placeholder.com/200x150.png?text=User+Login) | ![User Register](https://via.placeholder.com/200x150.png?text=User+Register) | ![Admin Login](https://via.placeholder.com/200x150.png?text=Admin+Login) | ![Admin Register](https://via.placeholder.com/200x150.png?text=Admin+Register) |
-
-### 3. Post-Login Dashboard
-*Features: Get Started, Show All Policies, View Demo, My Profile*
-![Post-Login Dashboard](https://via.placeholder.com/800x400.png?text=Post-Login+Dashboard)
-
-### 4. Optimization Module (Type Selection)
-*Selecting the type of insurance (3 screens: Life, Health, Car)*
-| Life Insurance | Health Insurance | Car Insurance |
-|:---:|:---:|:---:|
-| ![Life Insurance](https://via.placeholder.com/250x150.png?text=Life+Insurance) | ![Health Insurance](https://via.placeholder.com/250x150.png?text=Health+Insurance) | ![Car Insurance](https://via.placeholder.com/250x150.png?text=Car+Insurance) |
-
-### 5. Optimization Results
-*Results corresponding to each insurance type (3 screens)*
-| Life Results | Health Results | Car Results |
-|:---:|:---:|:---:|
-| ![Life Results](https://via.placeholder.com/250x150.png?text=Life+Results) | ![Health Results](https://via.placeholder.com/250x150.png?text=Health+Results) | ![Car Results](https://via.placeholder.com/250x150.png?text=Car+Results) |
-
-### 6. Policy Details & Allocation
-*Viewing the details of the resulting policies and allocating them to the user.*
-![Policy Details](https://via.placeholder.com/800x400.png?text=Policy+Details+and+Allocation)
-
-### 7. My Profile (Post-Allocation)
-*Viewing the user profile after policies have been successfully allocated.*
-![My Profile](https://via.placeholder.com/800x400.png?text=My+Profile)
-
-### 8. Logout Screen
-*The screen displayed after the user successfully logs out.*
-![Logout Screen](https://via.placeholder.com/800x400.png?text=Logout+Screen)
-
----
-
-## 27. Sample Use Cases
-- A young professional wants maximum health coverage but cannot spend more than $1,500/year.
-- A family requires combined Auto and Home insurance, aiming for a cumulative coverage of $1,000,000 without exceeding $3,000 in premiums.
-
-## 28. Example Scenarios
-**Scenario A:** User sets `maxPremium=5000` and `coverageMin=500000`. The engine evaluates 50 policies and recommends taking *Policy A (Health)* and *Policy D (Life)* because their combined premium is $4,800 and total coverage is $550,000, beating all other combinations.
-
-## 29. Performance Benefits
-By filtering policies by type and risk level *before* applying the backtracking algorithm, the time complexity is significantly reduced, ensuring lightning-fast API response times even as the database grows.
-
-## 30. Security Considerations
-- **Stateless Auth:** JWT prevents session hijacking.
-- **Password Hashing:** Passwords are never stored in plain text (Spring Security PasswordEncoder).
-- **CORS Configuration:** Restricts API access to authorized frontend domains.
-
-## 31. Scalability Considerations
-The RESTful, stateless nature of the application allows it to be easily dockerized and scaled horizontally across multiple instances behind a load balancer.
-
-## 32. Future Enhancements
-- Implement Machine Learning to predict risk levels.
-- Add caching (Redis) for frequently requested policy combinations.
-- Integrate a payment gateway for instant policy purchasing.
-
----
-
-## 33. Testing Strategy
-- **Unit Testing:** Validating individual Service methods (especially the Backtracking logic).
-- **Integration Testing:** Ensuring the Controller-Service-Repository flow works seamlessly with the test database.
-- **Security Testing:** Verifying unauthorized access is properly rejected (401/403 HTTP statuses).
-
-## 34. Test Cases Summary
-Tests ensure that the optimization algorithm never exceeds the budget, correctly handles edge cases (like impossible budget/coverage constraints), and that JWT tokens expire correctly.
-
-## 35. Challenges Faced
-Implementing the backtracking algorithm efficiently was a challenge. Initial iterations suffered from exponential time complexity ($O(2^N)$). This was resolved by implementing strict pruning conditions (stopping branches early if the current premium exceeds the max budget).
-
-## 36. Learning Outcomes
-- Deepened understanding of Spring Security and JWT filter chains.
-- Practical application of Data Structures and Algorithms (Backtracking) in a real-world business context.
-
----
-
-## 37. Project Impact
-This project bridges the gap between complex financial products and consumer understanding, making insurance accessible and transparent.
-
-## 38. Business Value
-For insurance brokerages, integrating this API can drastically increase conversion rates by offering customers mathematically proven "best deals" instantly, fostering trust and satisfaction.
-
----
-
-## 39. Contribution Guidelines
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 40. Code Style Guidelines
-- Follow standard Oracle Java Conventions.
-- Use meaningful variable names.
-- Write Javadoc comments for complex algorithmic methods.
-
-## 41. Version Control Strategy
-- `main` branch for production-ready code.
-- `dev` branch for active development.
-- Feature branches for specific tasks (`feature/login-ui`, `bugfix/jwt-expiration`).
-
----
-
-## 42. License Section
-This project is licensed under the **MIT License**. See the `LICENSE` file for details.
-
-## 43. Author Information
-**Shreyas Kumbhar**
-- **Role:** Full Stack Developer / Backend Engineer
-- **GitHub:** [@Shreyas-Kumbhar](https://github.com/Shreyas-Kumbhar)
-
-## 44. Contact Information
-- **Repository:** [https://github.com/Shreyas-Kumbhar/InsurancePolicyOptimizer.git](https://github.com/Shreyas-Kumbhar/InsurancePolicyOptimizer.git)
-
-## 45. Acknowledgements
-- Spring Boot Documentation
-- OpenAI / AI Assistance for architectural best practices
-- The open-source Java community
-
-## 46. References
-- [Spring Framework Reference](https://spring.io/projects/spring-framework)
-- [Backtracking Algorithms Explained](https://en.wikipedia.org/wiki/Backtracking)
-
-## 47. FAQ Section
-**Q: Can I use this with PostgreSQL instead of MySQL?**
-A: Yes! Simply change the JDBC URL and driver dependency in the `pom.xml`.
-
-**Q: How does the algorithm handle thousands of policies?**
-A: Currently, strict database filtering is applied first. For massive datasets, dynamic programming (knapsack implementation) or heuristic approaches (like Genetic Algorithms) would be implemented in future versions.
-
-## 48. Roadmap
-- [x] Initial Backend Architecture
-- [x] Optimization Engine Implementation
-- [x] JWT Security
-- [ ] Frontend React Dashboard
-- [ ] Redis Caching implementation
-
-## 49. Project Status
-🟢 **Active** - Actively maintained and open for contributions.
-
-## 50. Support Section
-If you encounter any issues or have questions, please [open an issue](https://github.com/Shreyas-Kumbhar/InsurancePolicyOptimizer/issues) in the GitHub repository.
-
----
-<div align="center">
-<i>Crafted with ❤️ by Shreyas Kumbhar</i>
-</div>
+This repository is shared for educational and portfolio purposes only.
+Unauthorized copying, redistribution, or commercial use is prohibited without written permission.
