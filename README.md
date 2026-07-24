@@ -1,98 +1,461 @@
-# Suraksha Shield - Insurance Policy Optimizer
+<div align="center">
 
-Suraksha Shield is a Full-Stack Spring Boot application designed to help users find the optimal combination of insurance policies based on their specific constraints (e.g., maximum premium they can pay and minimum coverage they need). It leverages a Backtracking Algorithm to evaluate combinations of policies to minimize the overall premium cost while meeting coverage requirements.
+# 🛡️ Suraksha Shield
+### Insurance Policy Optimizer
 
-## Table of Contents
-- [Technologies Used](#technologies-used)
-- [Project Structure and Java Code Explanation](#project-structure-and-java-code-explanation)
-  - [1. Entities (`com.suraksha.shield.entity`)](#1-entities)
-  - [2. Services (`com.suraksha.shield.service`)](#2-services)
-  - [3. Controllers (`com.suraksha.shield.controller`)](#3-controllers)
-  - [4. Security & Configuration (`com.suraksha.shield.config`)](#4-security--configuration)
-  - [5. Repositories (`com.suraksha.shield.repository`)](#5-repositories)
-  - [6. DTOs (Data Transfer Objects) (`com.suraksha.shield.dto`)](#6-dtos)
-- [How the Optimization Engine Works](#how-the-optimization-engine-works)
-- [How to Run](#how-to-run)
+**A full-stack Spring Boot application that helps users discover the most cost-effective insurance coverage using a backtracking optimization algorithm.**
 
-## Technologies Used
-- **Java 17**
-- **Spring Boot 3.2.5** (Web, Data JPA, Security, Validation)
-- **MySQL Database**
-- **JSON Web Tokens (JWT)** for authentication
-- **Maven** for build and dependency management
+![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen?style=flat-square&logo=springboot)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=flat-square&logo=mysql)
+![JWT](https://img.shields.io/badge/Auth-JWT-purple?style=flat-square&logo=jsonwebtokens)
+![Maven](https://img.shields.io/badge/Build-Maven-red?style=flat-square&logo=apachemaven)
+![License](https://img.shields.io/badge/License-Educational-lightgrey?style=flat-square)
+
+</div>
 
 ---
 
-## Project Structure and Java Code Explanation
+## 📋 Table of Contents
 
-The project follows a standard layered architecture typical for Spring Boot applications:
-
-### 1. Entities (`com.suraksha.shield.entity`)
-Entities map directly to database tables using JPA (Hibernate).
-*   **`Policy.java`**: Represents an insurance policy. It contains details such as `name`, `type`, `premium` (cost), `coverage` (benefit amount), `riskLevel`, and `provider`. It also has a Many-to-One relationship with the `Admin` who created it.
-*   **`User.java`**: Represents a standard user in the system. Users have attributes like `email`, `password`, and a list of `allocatedPolicies` (policies they have chosen).
-*   **`Admin.java`**: Represents an administrator user. Admins can create and manage policies in the system.
-
-### 2. Services (`com.suraksha.shield.service`)
-Services contain the core business logic of the application.
-*   **`PolicyService.java`**: The core component of this application. It provides CRUD operations (Create, Read, Update, Delete) for `Policy` entities. Crucially, it houses the `optimize()` method which implements the **Backtracking Algorithm** to find the optimal combination of policies.
-*   **`CustomUserDetailsService.java`**: Implements Spring Security's `UserDetailsService`. It loads user-specific data from the database (checking both `User` and `Admin` repositories) to facilitate the authentication process.
-
-### 3. Controllers (`com.suraksha.shield.controller`)
-Controllers handle incoming HTTP requests and return HTTP responses, acting as the bridge between the frontend and backend.
-*   **`PolicyController.java`**: Exposes endpoints for users to search for policies (`/api/policies/results`), view specific policy details (`/api/policies/{id}`), and allocate a policy to their profile (`/api/policies/{id}/allocate`).
-*   **`AuthController.java`**: Manages user authentication and registration. It provides endpoints like `/api/auth/login` (which returns a JWT) and `/api/auth/register`.
-*   **`AdminController.java`**: Secured endpoints intended only for Admins to add, edit, and delete policies.
-*   **`UserController.java`**: Endpoints for standard users to fetch their profile details and view the policies they have been allocated.
-*   **`PageController.java`**: Responsible for routing and serving static HTML views.
-
-### 4. Security & Configuration (`com.suraksha.shield.config`)
-Manages application security, JWT validation, and general setup.
-*   **`SecurityConfig.java`**: Configures Spring Security. It disables CSRF, sets session management to stateless (since we use JWTs), and defines which endpoints are public (like login/register) and which require authentication or specific roles (like Admin endpoints).
-*   **`JwtTokenProvider.java`**: Utility class used to generate, parse, and validate JSON Web Tokens.
-*   **`JwtAuthenticationFilter.java`**: A filter that runs once per request. It intercepts HTTP requests, extracts the JWT from the `Authorization` header, validates it, and sets the authenticated user in the `SecurityContext`.
-*   **`DatabaseSeeder.java`**: An initialization component that seeds the database with initial Admin accounts or default policies when the application starts.
-
-### 5. Repositories (`com.suraksha.shield.repository`)
-Interfaces extending Spring Data JPA's `JpaRepository`. They provide out-of-the-box methods for database operations (save, find, delete) without needing to write boilerplate SQL queries.
-*   **`PolicyRepository.java`**: Handles data access for policies. It includes custom methods to filter policies by type, risk level, or name.
-*   **`UserRepository.java`** & **`AdminRepository.java`**: Handle data access for users and admins respectively (e.g., finding a user by their email).
-
-### 6. DTOs (Data Transfer Objects) (`com.suraksha.shield.dto`)
-Simple Java classes used to transfer data between layers (usually between Controller and Service, or as API requests/responses) without exposing database entities directly. Examples include `LoginRequest`, `RegisterRequest`, and `PolicyOptimizationResult`.
+- [Overview](#-overview)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Architecture](#-architecture)
+- [How the Optimization Engine Works](#-how-the-optimization-engine-works)
+- [API Reference](#-api-reference)
+- [Database Schema](#-database-schema)
+- [Getting Started](#-getting-started)
+- [Default Credentials](#-default-credentials)
+- [Screenshots](#-screenshots)
+- [License](#-license)
 
 ---
 
-## How the Optimization Engine Works
+## 🔍 Overview
 
-The standout feature of this application is the policy optimizer located in `PolicyService.java`. It solves a variation of the Knapsack Problem.
+Suraksha Shield is a production-ready insurance policy optimization platform built with Java and Spring Boot. Users define their financial constraints — maximum annual premium and minimum coverage required — and the engine computes the optimal combination of policies that minimizes cost while satisfying coverage requirements.
 
-**The Goal**: Find a combination of policies where the total coverage is $\ge$ `coverageMin`, and the total premium is $\le$ `maxPremium`, such that the overall premium paid is strictly minimized.
-
-**The Algorithm (Backtracking)**:
-1.  **Filtering**: First, the system filters all available policies in the database based on the user's selected `type` and `riskLevel`.
-2.  **Backtracking (`backtrack` method)**: The algorithm recursively explores all possible combinations of the filtered policies.
-    *   For every policy in the list, the algorithm makes a choice: **Include** it in the current combination or **Exclude** it.
-    *   It keeps a running total of `currentPremium` and `currentCoverage`.
-    *   **Pruning**: If adding a policy exceeds the `maxPremium`, that path is immediately abandoned (pruned).
-    *   **Evaluating**: Whenever a valid combination is found (Coverage $\ge$ Minimum Required && Premium $\le$ Maximum Allowed), it checks if this combination's premium is lower than the best premium found so far. If it is, this becomes the new `bestCombination`.
-3.  **Result**: After exploring the possibilities, it returns a `PolicyOptimizationResult` containing the optimal list of policies, the total premium cost, and the total coverage achieved.
+The core algorithm solves a variant of the **0/1 Knapsack Problem** using **recursive backtracking with pruning**, ensuring the most cost-efficient policy portfolio is returned.
 
 ---
 
-## How to Run
-1.  Ensure you have **Java 17** and **MySQL** installed.
-2.  Create a MySQL database (check `application.properties` for the exact database name, username, and password required).
-3.  Navigate to the project root directory in your terminal.
-4.  Run the application using the Maven wrapper:
-    ```bash
-    ./mvnw spring-boot:run
-    ```
-5.  The application will start, usually on `http://localhost:8080`.
+## ✨ Features
 
+### User
+- Register and log in securely with JWT-based authentication
+- Configure optimization parameters — coverage range, max premium, policy type, and risk level
+- Dynamic risk calculation based on age, health, driving history, and lifestyle factors
+- Browse and view detailed information on all available policies
+- Allocate policies to a personal profile dashboard
+- View all allocated policies from the user dashboard
 
-Copyright © 2026 Shreyas Kumbhar.
-All rights reserved.
+### Admin
+- Secure admin login (separate from user login)
+- Full CRUD management of insurance policies
+- View all policies from a dedicated admin dashboard
+- Create and edit policies with provider, type, risk, premium, and coverage details
+
+### System
+- Auto-seeds admin account and 35 sample policies on first startup
+- Stateless JWT authentication — no sessions
+- Role-based access control (`ROLE_USER` / `ROLE_ADMIN`)
+- BCrypt password hashing
+- Input validation on all API endpoints
+- Global exception handling with meaningful error responses
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Language | Java 17 |
+| Framework | Spring Boot 3.2.5 |
+| Security | Spring Security 6 + JWT (JJWT 0.11.5) |
+| Persistence | Spring Data JPA + Hibernate |
+| Database | MySQL 8.0 |
+| Build Tool | Maven |
+| Frontend | HTML5, Bootstrap 5.3, Vanilla JS |
+| Server | Embedded Apache Tomcat |
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+└── main/
+    ├── java/com/suraksha/shield/
+    │   ├── config/
+    │   │   ├── DatabaseSeeder.java          # Seeds admin + 35 sample policies on startup
+    │   │   ├── JwtAuthenticationFilter.java # Validates JWT on every request
+    │   │   ├── JwtTokenProvider.java        # JWT generation, parsing, validation
+    │   │   ├── SecurityConfig.java          # Spring Security rules & filter chain
+    │   │   └── WebMvcConfig.java            # Static resource & URL routing config
+    │   ├── controller/
+    │   │   ├── AdminController.java         # Admin CRUD API (/api/admin/**)
+    │   │   ├── AuthController.java          # Login & register API (/api/auth/**)
+    │   │   ├── PageController.java          # Serves static HTML pages
+    │   │   ├── PolicyController.java        # Policy search & allocation API
+    │   │   └── UserController.java          # User profile API (/api/users/**)
+    │   ├── dto/
+    │   │   ├── JwtResponse.java             # Auth response payload
+    │   │   ├── LoginRequest.java            # Login request body
+    │   │   ├── PolicyDto.java               # Policy create/update payload
+    │   │   ├── PolicyOptimizationResult.java# Optimization engine response
+    │   │   └── RegisterRequest.java         # Registration request body
+    │   ├── entity/
+    │   │   ├── Admin.java                   # Admin JPA entity
+    │   │   ├── Policy.java                  # Policy JPA entity
+    │   │   └── User.java                    # User JPA entity (with allocated policies)
+    │   ├── exception/
+    │   │   ├── GlobalExceptionHandler.java  # Centralized error handling
+    │   │   └── ResourceNotFoundException.java
+    │   ├── repository/
+    │   │   ├── AdminRepository.java
+    │   │   ├── PolicyRepository.java        # Custom queries: filter by type, risk, name
+    │   │   └── UserRepository.java
+    │   ├── service/
+    │   │   ├── CustomUserDetailsService.java# Loads user/admin for Spring Security
+    │   │   └── PolicyService.java           # Core business logic + optimization engine
+    │   └── ShieldApplication.java           # Application entry point
+    └── resources/
+        ├── application.properties           # App configuration
+        ├── schema.sql                        # Database schema reference
+        └── static/
+            ├── index.html                    # Landing page
+            ├── login.html                    # User login
+            ├── register.html                 # User registration
+            ├── profile.html                  # User dashboard
+            ├── admin/                        # Admin pages
+            │   ├── login.html
+            │   ├── dashboard.html
+            │   ├── newPolicy.html
+            │   └── editPolicy.html
+            ├── policies/                     # Policy pages
+            │   ├── config.html               # Optimization parameter form
+            │   ├── results.html              # Search results
+            │   └── detail.html               # Policy detail view
+            ├── css/style.css
+            └── js/
+                ├── auth.js                   # Auth utilities
+                └── main.js                   # Navbar, footer, fetch helpers
+```
+
+---
+
+## 🏗 Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                      Browser (Client)                    │
+│          HTML + Bootstrap 5 + Vanilla JS + JWT           │
+└─────────────────────┬───────────────────────────────────┘
+                      │  HTTP Requests (JWT in header)
+┌─────────────────────▼───────────────────────────────────┐
+│                  Spring Boot Application                  │
+│                                                           │
+│  ┌─────────────────────────────────────────────────┐     │
+│  │           Spring Security Filter Chain           │     │
+│  │  JwtAuthenticationFilter → AuthorizationFilter  │     │
+│  └──────────────────────┬──────────────────────────┘     │
+│                         │                                 │
+│  ┌──────────────────────▼──────────────────────────┐     │
+│  │                  Controllers                     │     │
+│  │  AuthController │ PolicyController │ AdminCtrl  │     │
+│  └──────────────────────┬──────────────────────────┘     │
+│                         │                                 │
+│  ┌──────────────────────▼──────────────────────────┐     │
+│  │                   Services                       │     │
+│  │    PolicyService (Optimization Engine)           │     │
+│  │    CustomUserDetailsService                      │     │
+│  └──────────────────────┬──────────────────────────┘     │
+│                         │                                 │
+│  ┌──────────────────────▼──────────────────────────┐     │
+│  │              Repositories (JPA)                  │     │
+│  │  PolicyRepository │ UserRepository │ AdminRepo  │     │
+│  └──────────────────────┬──────────────────────────┘     │
+└─────────────────────────┼───────────────────────────────┘
+                          │  JDBC
+┌─────────────────────────▼───────────────────────────────┐
+│                     MySQL Database                        │
+│          admins │ users │ policies │ user_policies        │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ⚙️ How the Optimization Engine Works
+
+The engine is implemented in `PolicyService.java` and solves a variant of the **0/1 Knapsack Problem** using **backtracking with pruning**.
+
+### Goal
+Find a combination of policies where:
+- **Total coverage** ≥ `coverageMin`
+- **Total premium** ≤ `maxPremium`
+- **Total premium is minimized** across all valid combinations
+
+### Algorithm Steps
+
+```
+1. FILTER
+   └── Query policies by type and/or riskLevel from DB
+
+2. BACKTRACK (recursive)
+   └── For each policy at index i:
+       ├── EXCLUDE: skip to index i+1
+       └── INCLUDE: add to current combination
+           ├── PRUNE: if currentPremium > maxPremium → stop this branch
+           └── EVALUATE: if coverage met → update bestCombination if cheaper
+
+3. RETURN
+   └── PolicyOptimizationResult {
+         policies: bestCombination,
+         combinationMode: true,
+         totalPremium: minimizedPremium,
+         totalCoverage: achievedCoverage
+       }
+```
+
+### Complexity
+- **Time**: O(2ⁿ) worst case, significantly reduced by premium-based pruning
+- **Space**: O(n) recursion depth
+
+### Special Cases
+| Input | Behaviour |
+|---|---|
+| Name search | Bypasses backtracking, returns name-matched results sorted by premium |
+| `show_all=true` | Returns all policies sorted by premium, no optimization |
+| No filters | Runs backtracking on the full policy catalog |
+
+---
+
+## 📡 API Reference
+
+### Authentication
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | Public | Register a new user |
+| `POST` | `/api/auth/login` | Public | User login → returns JWT |
+| `POST` | `/api/auth/admin/login` | Public | Admin login → returns JWT |
+
+**Register Request Body:**
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@example.com",
+  "password": "yourpassword"
+}
+```
+
+**Login Request Body:**
+```json
+{
+  "email": "john@example.com",
+  "password": "yourpassword"
+}
+```
+
+**Login Response:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "id": 1,
+  "email": "john@example.com",
+  "role": "USER",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+```
+
+---
+
+### Policies
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/policies/results` | Public | Search & optimize policies |
+| `GET` | `/api/policies/{id}` | Public | Get policy by ID |
+| `POST` | `/api/policies/{id}/allocate` | `ROLE_USER` | Allocate policy to profile |
+
+**Query Parameters for `/api/policies/results`:**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `type` | string | `life`, `health`, `car`, `home`, `travel` |
+| `riskLevel` | string | `low`, `medium`, `high` |
+| `max_premium` | integer | Maximum annual premium (₹) |
+| `coverage_min` | integer | Minimum coverage required (₹) |
+| `coverage_max` | integer | Maximum coverage cap (₹) |
+| `name` | string | Search by policy name |
+| `show_all` | boolean | Return all policies sorted by premium |
+
+---
+
+### User
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/users/profile` | `ROLE_USER` | Get profile + allocated policies |
+
+---
+
+### Admin
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/admin/dashboard` | `ROLE_ADMIN` | List all policies |
+| `POST` | `/api/admin/policies` | `ROLE_ADMIN` | Create a new policy |
+| `PUT` | `/api/admin/policies/{id}` | `ROLE_ADMIN` | Update a policy |
+| `DELETE` | `/api/admin/policies/{id}` | `ROLE_ADMIN` | Delete a policy |
+
+**Policy Request Body (Create/Update):**
+```json
+{
+  "name": "LIC Jeevan Suraksha",
+  "type": "life",
+  "premium": 5000,
+  "coverage": 300000,
+  "riskLevel": "low",
+  "provider": "LIC"
+}
+```
+
+> All protected endpoints require the header:
+> `Authorization: Bearer <your_jwt_token>`
+
+---
+
+## 🗄 Database Schema
+
+```sql
+admins
+  id          BIGINT PK AUTO_INCREMENT
+  email       VARCHAR(255) UNIQUE NOT NULL
+  password    VARCHAR(255) NOT NULL          -- BCrypt hashed
+
+users
+  id          BIGINT PK AUTO_INCREMENT
+  first_name  VARCHAR(255) NOT NULL
+  last_name   VARCHAR(255) NOT NULL
+  email       VARCHAR(255) UNIQUE NOT NULL
+  password    VARCHAR(255) NOT NULL          -- BCrypt hashed
+
+policies
+  id            BIGINT PK AUTO_INCREMENT
+  name          VARCHAR(255) NOT NULL
+  type          VARCHAR(255) NOT NULL        -- life | health | car | home | travel
+  premium       INT NOT NULL
+  coverage      INT NOT NULL
+  risk_level    VARCHAR(50) NOT NULL         -- low | medium | high
+  provider      VARCHAR(255) NOT NULL
+  created_by_id BIGINT FK → admins(id)
+
+user_policies                               -- Many-to-Many join table
+  user_id     BIGINT FK → users(id)
+  policy_id   BIGINT FK → policies(id)
+  PRIMARY KEY (user_id, policy_id)
+```
+
+> Tables are auto-created by Hibernate on first startup (`ddl-auto=update`).
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Java 17+** — [Download](https://adoptium.net/)
+- **MySQL 8.0+** — [Download](https://dev.mysql.com/downloads/)
+- **Maven 3.8+** — [Download](https://maven.apache.org/download.cgi)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/InsurancePolicyOptimizer.git
+cd InsurancePolicyOptimizer
+```
+
+### 2. Configure the Database
+
+Make sure MySQL is running, then update `src/main/resources/application.properties` if your credentials differ:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/policies_db?createDatabaseIfNotExist=true
+spring.datasource.username=root
+spring.datasource.password=root
+```
+
+The database `policies_db` is created automatically on first run.
+
+### 3. Build & Run
+
+```bash
+mvn spring-boot:run
+```
+
+Or build a JAR and run it:
+
+```bash
+mvn clean package
+java -jar target/shield-1.0.0.jar
+```
+
+### 4. Open in Browser
+
+```
+http://localhost:3647
+```
+
+The app seeds an admin account and 35 sample policies automatically on first startup.
+
+---
+
+## 🔑 Default Credentials
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@gmail.com` | `admin123` |
+| User | *(register via `/register`)* | *(your choice)* |
+
+> Change the admin password after first login in a production environment.
+
+---
+
+## 🗺 Page Routes
+
+| URL | Description |
+|---|---|
+| `/` | Landing page |
+| `/login` | User login |
+| `/register` | User registration |
+| `/profile` | User dashboard (protected) |
+| `/policies` | Policy configuration & optimization form |
+| `/policies/results` | Optimization results |
+| `/policies/{id}` | Policy detail view |
+| `/admin/login` | Admin login |
+| `/admin/dashboard` | Admin policy management |
+| `/admin/policies/new` | Create new policy |
+| `/admin/policies/{id}/edit` | Edit existing policy |
+
+---
+
+## 📄 License
+
+```
+Copyright © 2026 Shreyas Kumbhar. All rights reserved.
 
 This repository is shared for educational and portfolio purposes only.
-Unauthorized copying, redistribution, or commercial use is prohibited without written permission.
+Unauthorized copying, redistribution, or commercial use is strictly
+prohibited without prior written permission from the author.
+```
+
+---
+
+<div align="center">
+  Built with ❤️ by <strong>Shreyas Kumbhar</strong>
+</div>
