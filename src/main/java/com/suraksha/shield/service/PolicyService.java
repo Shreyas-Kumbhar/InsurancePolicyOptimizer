@@ -65,16 +65,16 @@ public class PolicyService {
         policyRepository.delete(policy);
     }
 
-    // Optimization Engine implementing Backtracking Algorithm
+    // Optimization Engine implementing iterative subset search with pruning
     public PolicyOptimizationResult optimize(String type, String riskLevel, String name,
                                              Integer maxPremium, Integer coverageMin, Integer coverageMax) {
-        
+
         // Handle defaults
         if (maxPremium == null) maxPremium = 20000;
         if (coverageMin == null) coverageMin = 0;
         if (coverageMax == null) coverageMax = 5000000;
 
-        // Search by name bypasses backtracking
+        // Search by name bypasses optimization
         if (name != null && !name.trim().isEmpty()) {
             List<Policy> matching = policyRepository.findByNameContainingIgnoreCase(name);
             matching.sort(Comparator.comparingInt(Policy::getPremium));
@@ -84,7 +84,8 @@ public class PolicyService {
         // Apply filters
         List<Policy> filteredPolicies;
         boolean hasType = (type != null && !type.equalsIgnoreCase("All Types") && !type.trim().isEmpty());
-        boolean hasRisk = (riskLevel != null && !riskLevel.equalsIgnoreCase("All Levels") && !riskLevel.equalsIgnoreCase("Any Risk Level") && !riskLevel.trim().isEmpty());
+        boolean hasRisk = (riskLevel != null && !riskLevel.equalsIgnoreCase("All Levels")
+                && !riskLevel.equalsIgnoreCase("Any Risk Level") && !riskLevel.trim().isEmpty());
 
         if (hasType && hasRisk) {
             filteredPolicies = policyRepository.findByTypeIgnoreCaseAndRiskLevelIgnoreCase(type, riskLevel);
@@ -96,11 +97,20 @@ public class PolicyService {
             filteredPolicies = policyRepository.findAll();
         }
 
-        // Backtracking optimization
+        // Sort by premium ascending — helps pruning find good solutions early
+        filteredPolicies.sort(Comparator.comparingInt(Policy::getPremium));
+
+        // Cap at 20 policies to keep 2^n tractable (2^20 = ~1M combinations, safe)
+        if (filteredPolicies.size() > 20) {
+            filteredPolicies = filteredPolicies.subList(0, 20);
+        }
+
+        // Run backtracking
         List<Policy> bestCombination = new ArrayList<>();
         int[] minPremium = new int[]{Integer.MAX_VALUE};
 
-        backtrack(filteredPolicies, 0, new ArrayList<>(), 0, 0, coverageMin, coverageMax, maxPremium, bestCombination, minPremium);
+        backtrack(filteredPolicies, 0, new ArrayList<>(), 0, 0,
+                coverageMin, coverageMax, maxPremium, bestCombination, minPremium);
 
         bestCombination.sort(Comparator.comparingInt(Policy::getPremium));
 
@@ -113,8 +123,8 @@ public class PolicyService {
     private void backtrack(List<Policy> allPolicies, int index, List<Policy> currentCombination,
                            int currentPremium, int currentCoverage, int coverageMin, int coverageMax,
                            int maxPremium, List<Policy> bestCombination, int[] minPremium) {
-        
-        // If we meet coverage requirement and stay within premium limit, check if it's the best
+
+        // Valid combination found — record if it's the cheapest so far
         if (currentCoverage >= coverageMin && currentPremium <= maxPremium) {
             if (currentPremium < minPremium[0]) {
                 minPremium[0] = currentPremium;
@@ -123,22 +133,40 @@ public class PolicyService {
             }
         }
 
-        // Base cases to stop recursion
-        if (index >= allPolicies.size() || currentPremium > maxPremium) {
+        // Base case: exhausted all policies or exceeded budget
+        if (index >= allPolicies.size() || currentPremium >= maxPremium) {
             return;
         }
 
-        // Choice 1: Exclude the current policy
+        // Pruning: if even adding ALL remaining policies can't reach coverageMin, skip branch
+        int remainingCoverage = 0;
+        for (int i = index; i < allPolicies.size(); i++) {
+            remainingCoverage += allPolicies.get(i).getCoverage();
+        }
+        if (currentCoverage + remainingCoverage < coverageMin) {
+            return;
+        }
+
+        // Pruning: current path already more expensive than best found — abandon
+        if (currentPremium >= minPremium[0]) {
+            return;
+        }
+
+        Policy policy = allPolicies.get(index);
+
+        // Choice 1: Include current policy (if within budget and coverage cap)
+        if (currentPremium + policy.getPremium() <= maxPremium
+                && currentCoverage + policy.getCoverage() <= coverageMax) {
+            currentCombination.add(policy);
+            backtrack(allPolicies, index + 1, currentCombination,
+                    currentPremium + policy.getPremium(),
+                    currentCoverage + policy.getCoverage(),
+                    coverageMin, coverageMax, maxPremium, bestCombination, minPremium);
+            currentCombination.remove(currentCombination.size() - 1);
+        }
+
+        // Choice 2: Exclude current policy
         backtrack(allPolicies, index + 1, currentCombination, currentPremium, currentCoverage,
                 coverageMin, coverageMax, maxPremium, bestCombination, minPremium);
-
-        // Choice 2: Include the current policy
-        Policy policy = allPolicies.get(index);
-        if (currentPremium + policy.getPremium() <= maxPremium && currentCoverage + policy.getCoverage() <= coverageMax) {
-            currentCombination.add(policy);
-            backtrack(allPolicies, index + 1, currentCombination, currentPremium + policy.getPremium(),
-                    currentCoverage + policy.getCoverage(), coverageMin, coverageMax, maxPremium, bestCombination, minPremium);
-            currentCombination.remove(currentCombination.size() - 1); // backtrack
-        }
     }
 }

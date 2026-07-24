@@ -74,12 +74,6 @@
     <script src="/js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // Guard clause: results pages require user authentication
-            if (!getToken()) {
-                window.location.href = '/login';
-                return;
-            }
-
             const urlParams = new URLSearchParams(window.location.search);
             const showAll = urlParams.get('show_all') === 'true';
 

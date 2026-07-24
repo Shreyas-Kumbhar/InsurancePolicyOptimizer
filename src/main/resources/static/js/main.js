@@ -70,9 +70,13 @@ async function fetchWithAuth(url, options = {}) {
     const response = await fetch(url, options);
 
     if (response.status === 401 || response.status === 403) {
-        // Token expired or invalid, redirect to login
-        clearAuth();
-        window.location.href = '/login';
+        // Token expired or invalid — only redirect if on a protected page
+        const path = window.location.pathname;
+        const protectedPaths = ['/profile', '/profile.html'];
+        if (protectedPaths.some(p => path.startsWith(p))) {
+            clearAuth();
+            window.location.href = '/login';
+        }
     }
 
     return response;
