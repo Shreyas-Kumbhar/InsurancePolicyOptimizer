@@ -532,13 +532,7 @@ The app seeds an admin account and 35 sample policies automatically on first sta
 
 ## 📄 License
 
-```
-Copyright © 2026 Shreyas Kumbhar. All rights reserved.
-
-This repository is shared for educational and portfolio purposes only.
-Unauthorized copying, redistribution, or commercial use is strictly
-prohibited without prior written permission from the author.
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
