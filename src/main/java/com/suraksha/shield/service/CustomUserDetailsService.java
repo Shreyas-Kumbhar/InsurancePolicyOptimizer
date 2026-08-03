@@ -4,7 +4,7 @@ import com.suraksha.shield.entity.Admin;
 import com.suraksha.shield.entity.User;
 import com.suraksha.shield.repository.AdminRepository;
 import com.suraksha.shield.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,13 +15,11 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private AdminRepository adminRepository;
+    private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -29,10 +27,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            return new org.springframework.security.core.userdetails.User(
+            return new CustomUserDetails(
                     user.getEmail(),
                     user.getPassword(),
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")),
+                    user.getFirstName(),
+                    user.getLastName()
             );
         }
 
@@ -40,10 +40,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         Optional<Admin> adminOpt = adminRepository.findByEmail(email);
         if (adminOpt.isPresent()) {
             Admin admin = adminOpt.get();
-            return new org.springframework.security.core.userdetails.User(
+            return new CustomUserDetails(
                     admin.getEmail(),
                     admin.getPassword(),
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")),
+                    "Admin",
+                    ""
             );
         }
 

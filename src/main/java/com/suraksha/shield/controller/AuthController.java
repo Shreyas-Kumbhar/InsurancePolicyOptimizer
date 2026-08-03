@@ -9,7 +9,7 @@ import com.suraksha.shield.entity.User;
 import com.suraksha.shield.repository.AdminRepository;
 import com.suraksha.shield.repository.UserRepository;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,22 +25,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private AdminRepository adminRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtTokenProvider tokenProvider;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider tokenProvider;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -68,14 +60,14 @@ public class AuthController {
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return ResponseEntity.ok(new JwtResponse(
-                jwt,
-                user.getId(),
-                user.getEmail(),
-                "USER",
-                user.getFirstName(),
-                user.getLastName()
-        ));
+        return ResponseEntity.ok(JwtResponse.builder()
+                .token(jwt)
+                .id(user.getId())
+                .email(user.getEmail())
+                .role("USER")
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .build());
     }
 
     @PostMapping("/admin/login")
@@ -104,12 +96,12 @@ public class AuthController {
         Admin admin = adminRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("Admin not found"));
 
-        return ResponseEntity.ok(new JwtResponse(
-                jwt,
-                admin.getId(),
-                admin.getEmail(),
-                "ADMIN"
-        ));
+        return ResponseEntity.ok(JwtResponse.builder()
+                .token(jwt)
+                .id(admin.getId())
+                .email(admin.getEmail())
+                .role("ADMIN")
+                .build());
     }
 
     @PostMapping("/register")
@@ -121,12 +113,12 @@ public class AuthController {
         }
 
         // Create new user
-        User user = new User(
-                registerRequest.getFirstName(),
-                registerRequest.getLastName(),
-                registerRequest.getEmail(),
-                passwordEncoder.encode(registerRequest.getPassword())
-        );
+        User user = User.builder()
+                .firstName(registerRequest.getFirstName())
+                .lastName(registerRequest.getLastName())
+                .email(registerRequest.getEmail())
+                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .build();
 
         userRepository.save(user);
 
@@ -141,13 +133,13 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
 
-        return ResponseEntity.ok(new JwtResponse(
-                jwt,
-                user.getId(),
-                user.getEmail(),
-                "USER",
-                user.getFirstName(),
-                user.getLastName()
-        ));
+        return ResponseEntity.ok(JwtResponse.builder()
+                .token(jwt)
+                .id(user.getId())
+                .email(user.getEmail())
+                .role("USER")
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .build());
     }
 }

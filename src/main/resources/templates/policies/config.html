@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head th:replace="~{fragments/layout :: head('Policy Configuration')}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="flex-grow-1 bg-light py-5">
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="text-center mb-5">
+          <h1 class="display-5 fw-bolder font-headline text-dark mb-3">Policy Configuration</h1>
+          <p class="fs-5 text-secondary">Set your parameters to let the engine find the most optimized coverage.</p>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+          <div class="card-header bg-white border-bottom p-4">
+            <div class="d-flex align-items-center gap-3">
+              <div class="bg-primary-subtle text-primary rounded-circle p-2 d-flex">
+                <span class="material-symbols-outlined">tune</span>
+              </div>
+              <h4 class="mb-0 fw-bold font-headline">Optimization Parameters</h4>
+            </div>
+          </div>
+          <div class="card-body p-5">
+            <form action="/policies/results" method="GET">
+
+              <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-secondary fs-5">health_and_safety</span>
+                Coverage Required
+              </h5>
+              <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                  <label class="form-label text-secondary fw-semibold small">Minimum Coverage (₹)</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">₹</span>
+                    <input type="number" class="form-control border-start-0 ps-0" name="coverage_min" value="100000"/>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary fw-semibold small">Maximum Coverage (₹)</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">₹</span>
+                    <input type="number" class="form-control border-start-0 ps-0" name="coverage_max" value="2000000"/>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="text-muted mb-5"/>
+
+              <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-secondary fs-5">account_balance_wallet</span>
+                Premium Constraint
+              </h5>
+              <div class="mb-5">
+                <label class="form-label text-secondary fw-semibold small">Maximum Annual Premium (₹)</label>
+                <div class="input-group mb-2">
+                  <span class="input-group-text bg-light border-end-0">₹</span>
+                  <input type="number" class="form-control border-start-0 ps-0" name="max_premium" value="10000"/>
+                </div>
+                <div class="form-text">The highest amount you are willing to pay per year.</div>
+              </div>
+
+              <hr class="text-muted mb-5"/>
+
+              <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                  <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary fs-5">category</span>
+                    Policy Type
+                  </h5>
+                  <select class="form-select form-select-lg" name="type" id="policyTypeSelect">
+                    <option value="All Types" selected>All Types</option>
+                    <option value="life">Life Insurance</option>
+                    <option value="health">Health Insurance</option>
+                    <option value="car">Car Insurance</option>
+                    <option value="home">Home Insurance</option>
+                    <option value="travel">Travel Insurance</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary fs-5">speed</span>
+                    Risk Level
+                  </h5>
+                  <input type="hidden" name="riskLevel" id="riskLevelHidden" value="All Levels"/>
+                  <input type="text" class="form-control form-control-lg bg-light text-secondary fw-semibold"
+                         id="riskLevelDisplay" value="Any Risk Level" readonly/>
+                </div>
+              </div>
+
+              <!-- Dynamic Risk Factors (JS-assisted, minimal JS only for this UI widget) -->
+              <div id="riskFactorsContainer" style="display:none;" class="mb-5 p-4 bg-light rounded-4 border">
+                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2 text-primary">
+                  <span class="material-symbols-outlined fs-5">analytics</span>
+                  Factors Used to Calculate Risk
+                </h5>
+                <!-- Health Factors -->
+                <div id="healthFactors" class="risk-section" style="display:none;">
+                  <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label small fw-semibold">Age</label><input type="number" class="form-control" id="healthAge" value="30" min="18" max="65"/></div>
+                    <div class="col-md-4"><label class="form-label small fw-semibold">Medical History</label>
+                      <select class="form-select" id="healthHistory"><option value="good">Good</option><option value="fair">Fair</option><option value="poor">Poor</option></select>
+                    </div>
+                    <div class="col-md-4"><label class="form-label small fw-semibold">Smoking/Alcohol</label>
+                      <select class="form-select" id="healthSmoking"><option value="no">No</option><option value="yes">Yes</option></select>
+                    </div>
+                    <div class="col-md-4"><label class="form-label small fw-semibold">BMI</label><input type="number" class="form-control" id="healthBMI" value="22" min="10" max="50"/></div>
+                    <div class="col-md-4"><label class="form-label small fw-semibold">Existing Diseases</label>
+                      <select class="form-select" id="healthDiseases"><option value="none">None</option><option value="minor">Minor</option><option value="major">Major</option></select>
+                    </div>
+                  </div>
+                </div>
+                <!-- Car Factors -->
+                <div id="carFactors" class="risk-section" style="display:none;">
+                  <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label small fw-semibold">Driving History (Years)</label><input type="number" class="form-control" id="carHistory" value="5" min="0" max="80"/></div>
+                    <div class="col-md-4"><label class="form-label small fw-semibold">Accidents</label>
+                      <select class="form-select" id="carAccidents"><option value="0">0</option><option value="1">1</option><option value="2">2+</option></select>
+                    </div>
+                    <div class="col-md-4"><label class="form-label small fw-semibold">Vehicle Type</label>
+                      <select class="form-select" id="carType"><option value="scooter">Scooter</option><option value="sedan">Sedan</option><option value="suv">SUV</option><option value="sports">Sports</option></select>
+                    </div>
+                  </div>
+                </div>
+                <!-- Life Factors -->
+                <div id="lifeFactors" class="risk-section" style="display:none;">
+                  <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label small fw-semibold">Age</label><input type="number" class="form-control" id="lifeAge" value="30" min="18" max="65"/></div>
+                    <div class="col-md-4"><label class="form-label small fw-semibold">Health Condition</label>
+                      <select class="form-select" id="lifeHealth"><option value="excellent">Excellent</option><option value="good">Good</option><option value="poor">Poor</option></select>
+                    </div>
+                    <div class="col-md-4"><label class="form-label small fw-semibold">Occupation</label>
+                      <select class="form-select" id="lifeOccupation"><option value="office">Office</option><option value="manual">Manual</option><option value="dangerous">Dangerous</option></select>
+                    </div>
+                    <div class="col-md-4"><label class="form-label small fw-semibold">Smoking</label>
+                      <select class="form-select" id="lifeSmoking"><option value="no">No</option><option value="yes">Yes</option></select>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-3 text-end">
+                  <span class="badge bg-success fs-6 p-2" id="autoRiskBadge">Calculated Risk: Low</span>
+                </div>
+              </div>
+
+              <div class="d-grid gap-3 mt-4 d-md-flex">
+                <!-- Show submit only to authenticated users -->
+                <div sec:authorize="isAuthenticated()" class="w-100">
+                  <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold py-3 shadow w-100">
+                    <span class="d-flex align-items-center justify-content-center gap-2">
+                      <span class="material-symbols-outlined">network_node</span> Run Optimization Engine
+                    </span>
+                  </button>
+                </div>
+                <div sec:authorize="isAnonymous()" class="w-100">
+                  <a href="/login" class="btn btn-primary btn-lg rounded-3 fw-bold py-3 shadow w-100 text-decoration-none d-flex align-items-center justify-content-center gap-2">
+                    <span class="material-symbols-outlined">lock</span> Login to Run Engine
+                  </a>
+                </div>
+                <a href="/policies/results?show_all=true" class="btn btn-outline-primary btn-lg rounded-3 fw-bold py-3 shadow-sm w-100 d-flex align-items-center justify-content-center gap-2">
+                  <span class="material-symbols-outlined">list_alt</span> Show All Policies
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Minimal JS — only for the live risk calculator UI widget (no auth/fetch needed)
+  const typeSelect = document.getElementById('policyTypeSelect');
+  const riskDisplay = document.getElementById('riskLevelDisplay');
+  const riskHidden = document.getElementById('riskLevelHidden');
+  const container = document.getElementById('riskFactorsContainer');
+  const badge = document.getElementById('autoRiskBadge');
+  const sections = { health: document.getElementById('healthFactors'), car: document.getElementById('carFactors'), life: document.getElementById('lifeFactors') };
+
+  typeSelect.addEventListener('change', function () {
+    Object.values(sections).forEach(s => s && (s.style.display = 'none'));
+    container.style.display = sections[this.value] ? 'block' : 'none';
+    if (sections[this.value]) { sections[this.value].style.display = 'block'; updateRisk(); }
+    else { riskDisplay.value = 'Any Risk Level'; riskHidden.value = 'All Levels'; }
+  });
+
+  document.querySelectorAll('input,select').forEach(el => { el.addEventListener('change', updateRisk); el.addEventListener('input', updateRisk); });
+  
+  document.querySelectorAll('input[type="number"]').forEach(el => {
+    el.addEventListener('change', function() {
+      if (this.min && parseFloat(this.value) < parseFloat(this.min)) this.value = this.min;
+      if (this.max && parseFloat(this.value) > parseFloat(this.max)) this.value = this.max;
+      updateRisk();
+    });
+  });
+
+  function updateRisk() {
+    const type = typeSelect.value; let score = 0;
+    if (type === 'health') {
+      const age = +document.getElementById('healthAge').value;
+      if (age > 50) score += 2; else if (age > 40) score += 1;
+      if (document.getElementById('healthHistory').value === 'poor') score += 2;
+      else if (document.getElementById('healthHistory').value === 'fair') score += 1;
+      if (document.getElementById('healthSmoking').value === 'yes') score += 3;
+      const bmi = +document.getElementById('healthBMI').value;
+      if (bmi > 30) score += 2; else if (bmi > 25) score += 1;
+      if (document.getElementById('healthDiseases').value === 'major') score += 3;
+      else if (document.getElementById('healthDiseases').value === 'minor') score += 1;
+    } else if (type === 'car') {
+      const acc = +document.getElementById('carAccidents').value;
+      if (acc >= 2) score += 3; else if (acc === 1) score += 1;
+      if (document.getElementById('carType').value === 'sports') score += 2;
+      if (+document.getElementById('carHistory').value < 2) score += 2;
+    } else if (type === 'life') {
+      const age = +document.getElementById('lifeAge').value;
+      if (age > 60) score += 3; else if (age > 45) score += 1;
+      if (document.getElementById('lifeHealth').value === 'poor') score += 3;
+      else if (document.getElementById('lifeHealth').value === 'good') score += 1;
+      if (document.getElementById('lifeOccupation').value === 'dangerous') score += 3;
+      else if (document.getElementById('lifeOccupation').value === 'manual') score += 1;
+      if (document.getElementById('lifeSmoking').value === 'yes') score += 3;
+    }
+    const level = score >= 5 ? 'high' : score >= 3 ? 'medium' : 'low';
+    const names = { low: 'Low Risk', medium: 'Medium Risk', high: 'High Risk' };
+    riskDisplay.value = names[level]; riskHidden.value = level;
+    badge.textContent = 'Calculated Risk: ' + level.charAt(0).toUpperCase() + level.slice(1);
+    badge.className = 'badge fs-6 p-2 ' + (level === 'high' ? 'bg-danger' : level === 'medium' ? 'bg-warning text-dark' : 'bg-success');
+  }
+</script>
+</body>
+</html>

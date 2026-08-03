@@ -1,10 +1,12 @@
 package com.suraksha.shield.config;
 
-import jakarta.servlet.DispatcherType;
 import com.suraksha.shield.service.CustomUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -12,23 +14,28 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
-
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomUserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -48,47 +55,93 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
+    /**
+     * Routes user after login based on their role:
+     * ADMIN  → /admin/dashboard
+     * USER   → /policies
+     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public AuthenticationSuccessHandler roleBasedSuccessHandler() {
+        return (HttpServletRequest request, HttpServletResponse response, Authentication auth) -> {
+            boolean isAdmin = auth.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .anyMatch(r -> r.equals("ROLE_ADMIN"));
+            response.sendRedirect(isAdmin ? "/admin/dashboard" : "/policies");
+        };
+    }
+
+    @Bean
+    public AuthenticationFailureHandler customFailureHandler() {
+        return (HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) -> {
+            String referer = request.getHeader("Referer");
+            if (referer != null && referer.contains("/admin/login")) {
+                response.sendRedirect("/admin/login?error=true");
+            } else {
+                response.sendRedirect("/login?error=true");
+            }
+        };
+    }
+
+    /**
+     * Order(1): REST API — stateless JWT, covers /api/**
+     */
+    @Bean
+    @Order(1)
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
+            .securityMatcher("/api/**")
+            .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Allow FORWARD dispatches (internal forwards from ViewControllers) without re-checking
-                .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
-                // All static files and page routes are public (HTML, CSS, JS)
-                .requestMatchers(
-                    "/", "/index.html",
-                    "/login", "/login.html",
-                    "/register", "/register.html",
-                    "/profile", "/profile.html",
-                    "/policies", "/policies/**",
-                    "/admin/login", "/admin/login.html",
-                    "/admin/dashboard", "/admin/dashboard.html",
-                    "/admin/policies/**",
-                    "/admin/**",
-                    "/css/**", "/js/**", "/favicon.ico", "/*.html"
-                ).permitAll()
-                // Auth APIs are public
                 .requestMatchers("/api/auth/**").permitAll()
-                // Policy results/search is public (must be listed BEFORE the {id} wildcard rule)
                 .requestMatchers(HttpMethod.GET, "/api/policies/results").permitAll()
-                // Policy GET by id is public
-                .requestMatchers(HttpMethod.GET, "/api/policies/{id}").permitAll()
-                // User profile & policy allocation require ROLE_USER
-                .requestMatchers("/api/users/profile").hasRole("USER")
-                .requestMatchers(HttpMethod.POST, "/api/policies/{id}/allocate").hasRole("USER")
-                // Admin API actions require ROLE_ADMIN
-                .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/admin/**").hasRole("ADMIN")
-                // All other requests must be authenticated
+                .requestMatchers(HttpMethod.GET, "/api/policies/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
-            );
+            )
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+
+    /**
+     * Order(2): Thymeleaf web pages — session-based form login.
+     * Single login URL handles both USER and ADMIN; role-based redirect
+     * is handled by roleBasedSuccessHandler().
+     */
+    @Bean
+    @Order(2)
+    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/css/**", "/js/**", "/screenshots/**", "/favicon.ico").permitAll()
+                .requestMatchers("/", "/login", "/admin/login", "/register").permitAll()
+                .requestMatchers(HttpMethod.POST, "/register").permitAll()
+                .requestMatchers(HttpMethod.GET,  "/policies", "/policies/results").permitAll()
+                .requestMatchers(HttpMethod.GET,  "/policies/{id}").permitAll()
+                .requestMatchers("/profile/**").hasRole("USER")
+                .requestMatchers(HttpMethod.POST, "/policies/*/allocate").hasRole("USER")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .usernameParameter("email")
+                .passwordParameter("password")
+                .successHandler(roleBasedSuccessHandler())
+                .failureHandler(customFailureHandler())
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll()
+            )
+            .authenticationProvider(authenticationProvider());
 
         return http.build();
     }

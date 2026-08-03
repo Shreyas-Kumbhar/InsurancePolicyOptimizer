@@ -1,39 +1,30 @@
 package com.suraksha.shield.controller;
 
+import com.suraksha.shield.entity.Policy;
 import com.suraksha.shield.entity.User;
 import com.suraksha.shield.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.suraksha.shield.service.PolicyService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PolicyService policyService;
 
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email;
-        if (principal instanceof UserDetails) {
-            email = ((UserDetails) principal).getUsername();
-        } else {
-            email = principal.toString();
-        }
+        User user = getAuthenticatedUser();
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // Safe profile map that excludes password hashes
         Map<String, Object> profile = new HashMap<>();
         profile.put("id", user.getId());
         profile.put("firstName", user.getFirstName());
@@ -42,5 +33,32 @@ public class UserController {
         profile.put("allocatedPolicies", user.getAllocatedPolicies());
 
         return ResponseEntity.ok(profile);
+    }
+
+    @DeleteMapping("/policies/{policyId}/deallocate")
+    public ResponseEntity<?> deallocatePolicy(@PathVariable Long policyId) {
+        User user = getAuthenticatedUser();
+        Policy policy = policyService.getPolicyById(policyId);
+
+        boolean removed = user.getAllocatedPolicies().removeIf(p -> p.getId().equals(policy.getId()));
+
+        Map<String, String> response = new HashMap<>();
+        if (removed) {
+            userRepository.save(user);
+            response.put("message", "Policy removed from your profile.");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "This policy was not allocated to your profile.");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    private User getAuthenticatedUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = (principal instanceof UserDetails)
+                ? ((UserDetails) principal).getUsername()
+                : principal.toString();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

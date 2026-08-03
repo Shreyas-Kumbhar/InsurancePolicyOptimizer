@@ -103,7 +103,15 @@ public class DatabaseSeeder implements CommandLineRunner {
                 String riskLevel = columns[4].trim(); // e.g. "low"
                 String provider  = columns[5].trim(); // e.g. "LIC"
 
-                policies.add(new Policy(name, type, premium, coverage, riskLevel, provider, admin));
+                policies.add(Policy.builder()
+                        .name(name)
+                        .type(type)
+                        .premium(premium)
+                        .coverage(coverage)
+                        .riskLevel(riskLevel)
+                        .provider(provider)
+                        .createdBy(admin)
+                        .build());
             }
 
             reader.close();

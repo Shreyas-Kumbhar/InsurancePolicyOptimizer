@@ -6,7 +6,7 @@ import com.suraksha.shield.entity.Admin;
 import com.suraksha.shield.entity.Policy;
 import com.suraksha.shield.exception.ResourceNotFoundException;
 import com.suraksha.shield.repository.PolicyRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,10 +18,10 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class PolicyService {
 
-    @Autowired
-    private PolicyRepository policyRepository;
+    private final PolicyRepository policyRepository;
 
     public List<Policy> getAllPolicies() {
         return policyRepository.findTop100Policies();
@@ -68,105 +68,90 @@ public class PolicyService {
     // Optimization Engine implementing iterative subset search with pruning
     public PolicyOptimizationResult optimize(String type, String riskLevel, String name,
                                              Integer maxPremium, Integer coverageMin, Integer coverageMax) {
-
-        // Handle defaults
         if (maxPremium == null) maxPremium = 20000;
         if (coverageMin == null) coverageMin = 0;
         if (coverageMax == null) coverageMax = 5000000;
 
-        // Search by name bypasses optimization
         if (name != null && !name.trim().isEmpty()) {
             List<Policy> matching = policyRepository.findByNameContainingIgnoreCase(name);
             matching.sort(Comparator.comparingInt(Policy::getPremium));
             return new PolicyOptimizationResult(matching, false, 0, 0);
         }
 
-        // Apply filters
         List<Policy> filteredPolicies;
         boolean hasType = (type != null && !type.equalsIgnoreCase("All Types") && !type.trim().isEmpty());
         boolean hasRisk = (riskLevel != null && !riskLevel.equalsIgnoreCase("All Levels")
                 && !riskLevel.equalsIgnoreCase("Any Risk Level") && !riskLevel.trim().isEmpty());
 
         if (hasType && hasRisk) {
-            filteredPolicies = policyRepository.findByTypeIgnoreCaseAndRiskLevelIgnoreCase(type, riskLevel);
+            filteredPolicies = policyRepository.findTop200ByTypeAndRiskLevel(type, riskLevel, maxPremium);
         } else if (hasType) {
-            filteredPolicies = policyRepository.findByTypeIgnoreCase(type);
+            filteredPolicies = policyRepository.findTop200ByType(type, maxPremium);
         } else if (hasRisk) {
-            filteredPolicies = policyRepository.findByRiskLevelIgnoreCase(riskLevel);
+            filteredPolicies = policyRepository.findTop200ByRiskLevel(riskLevel, maxPremium);
         } else {
-            filteredPolicies = policyRepository.findAll();
+            filteredPolicies = policyRepository.findTop200MostEfficient(maxPremium);
         }
 
-        // Sort by premium ascending — helps pruning find good solutions early
-        filteredPolicies.sort(Comparator.comparingInt(Policy::getPremium));
-
-        // Cap at 20 policies to keep 2^n tractable (2^20 = ~1M combinations, safe)
-        if (filteredPolicies.size() > 20) {
-            filteredPolicies = filteredPolicies.subList(0, 20);
+        java.util.Map<Integer, Policy> bestByPremium = new java.util.HashMap<>();
+        for (Policy p : filteredPolicies) {
+            int prm = p.getPremium();
+            if (!bestByPremium.containsKey(prm) || bestByPremium.get(prm).getCoverage() < p.getCoverage()) {
+                bestByPremium.put(prm, p);
+            }
         }
+        
+        List<Policy> uniquePolicies = new ArrayList<>(bestByPremium.values());
+        uniquePolicies.sort((p1, p2) -> {
+            double eff1 = (double) p1.getCoverage() / p1.getPremium();
+            double eff2 = (double) p2.getCoverage() / p2.getPremium();
+            return Double.compare(eff2, eff1);
+        });
 
-        // Run backtracking
-        List<Policy> bestCombination = new ArrayList<>();
-        int[] minPremium = new int[]{Integer.MAX_VALUE};
+        int[] dp = new int[maxPremium + 1];
+        java.util.Arrays.fill(dp, -1);
+        dp[0] = 0;
+        
+        List<Policy>[] dpCombos = new ArrayList[maxPremium + 1];
+        dpCombos[0] = new ArrayList<>();
 
-        backtrack(filteredPolicies, 0, new ArrayList<>(), 0, 0,
-                coverageMin, coverageMax, maxPremium, bestCombination, minPremium);
-
-        bestCombination.sort(Comparator.comparingInt(Policy::getPremium));
-
-        int totalCoverage = bestCombination.stream().mapToInt(Policy::getCoverage).sum();
-        int totalPremium = minPremium[0] == Integer.MAX_VALUE ? 0 : minPremium[0];
-
-        return new PolicyOptimizationResult(bestCombination, true, totalPremium, totalCoverage);
-    }
-
-    private void backtrack(List<Policy> allPolicies, int index, List<Policy> currentCombination,
-                           int currentPremium, int currentCoverage, int coverageMin, int coverageMax,
-                           int maxPremium, List<Policy> bestCombination, int[] minPremium) {
-
-        // Valid combination found — record if it's the cheapest so far
-        if (currentCoverage >= coverageMin && currentPremium <= maxPremium) {
-            if (currentPremium < minPremium[0]) {
-                minPremium[0] = currentPremium;
-                bestCombination.clear();
-                bestCombination.addAll(currentCombination);
+        for (Policy p : uniquePolicies) {
+            int cost = p.getPremium();
+            int val = p.getCoverage();
+            
+            for (int w = maxPremium; w >= cost; w--) {
+                if (dp[w - cost] != -1) {
+                    int newCoverage = dp[w - cost] + val;
+                    if (newCoverage <= coverageMax) {
+                        if (newCoverage > dp[w]) {
+                            dp[w] = newCoverage;
+                            List<Policy> newCombo = new ArrayList<>(dpCombos[w - cost]);
+                            newCombo.add(p);
+                            dpCombos[w] = newCombo;
+                        }
+                    }
+                }
             }
         }
 
-        // Base case: exhausted all policies or exceeded budget
-        if (index >= allPolicies.size() || currentPremium >= maxPremium) {
-            return;
+        int bestPrm = -1;
+        int maxCov = -1;
+
+        for (int w = 0; w <= maxPremium; w++) {
+            if (dp[w] >= coverageMin && dp[w] <= coverageMax) {
+                if (dp[w] > maxCov) {
+                    maxCov = dp[w];
+                    bestPrm = w;
+                }
+            }
         }
 
-        // Pruning: if even adding ALL remaining policies can't reach coverageMin, skip branch
-        int remainingCoverage = 0;
-        for (int i = index; i < allPolicies.size(); i++) {
-            remainingCoverage += allPolicies.get(i).getCoverage();
+        if (bestPrm != -1) {
+            List<Policy> bestCombination = dpCombos[bestPrm];
+            bestCombination.sort(Comparator.comparingInt(Policy::getPremium));
+            return new PolicyOptimizationResult(bestCombination, true, bestPrm, dp[bestPrm]);
         }
-        if (currentCoverage + remainingCoverage < coverageMin) {
-            return;
-        }
-
-        // Pruning: current path already more expensive than best found — abandon
-        if (currentPremium >= minPremium[0]) {
-            return;
-        }
-
-        Policy policy = allPolicies.get(index);
-
-        // Choice 1: Include current policy (if within budget and coverage cap)
-        if (currentPremium + policy.getPremium() <= maxPremium
-                && currentCoverage + policy.getCoverage() <= coverageMax) {
-            currentCombination.add(policy);
-            backtrack(allPolicies, index + 1, currentCombination,
-                    currentPremium + policy.getPremium(),
-                    currentCoverage + policy.getCoverage(),
-                    coverageMin, coverageMax, maxPremium, bestCombination, minPremium);
-            currentCombination.remove(currentCombination.size() - 1);
-        }
-
-        // Choice 2: Exclude current policy
-        backtrack(allPolicies, index + 1, currentCombination, currentPremium, currentCoverage,
-                coverageMin, coverageMax, maxPremium, bestCombination, minPremium);
+        
+        return new PolicyOptimizationResult(new ArrayList<>(), true, 0, 0);
     }
 }
