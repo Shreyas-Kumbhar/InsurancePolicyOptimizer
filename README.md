@@ -56,6 +56,7 @@ The core algorithm solves a variant of the **0/1 Knapsack Problem** using **recu
 - Full CRUD management of insurance policies
 - View all policies from a dedicated admin dashboard
 - Create and edit policies with provider, type, risk, premium, and coverage details
+- Bulk import policies via standard CSV or Kaggle dataset CSV
 
 ### System
 - Auto-seeds admin account and 35 sample policies on first startup
@@ -87,61 +88,67 @@ The core algorithm solves a variant of the **0/1 Knapsack Problem** using **recu
 ```
 src/
 └── main/
-    ├── java/com/suraksha/shield/
-    │   ├── config/
-    │   │   ├── DatabaseSeeder.java          # Seeds admin + 35 sample policies on startup
-    │   │   ├── JwtAuthenticationFilter.java # Validates JWT on every request
-    │   │   ├── JwtTokenProvider.java        # JWT generation, parsing, validation
-    │   │   ├── SecurityConfig.java          # Spring Security rules & filter chain
-    │   │   └── WebMvcConfig.java            # Static resource & URL routing config
-    │   ├── controller/
-    │   │   ├── AdminController.java         # Admin CRUD API (/api/admin/**)
-    │   │   ├── AuthController.java          # Login & register API (/api/auth/**)
-    │   │   ├── PageController.java          # Serves static HTML pages
-    │   │   ├── PolicyController.java        # Policy search & allocation API
-    │   │   └── UserController.java          # User profile API (/api/users/**)
-    │   ├── dto/
-    │   │   ├── JwtResponse.java             # Auth response payload
-    │   │   ├── LoginRequest.java            # Login request body
-    │   │   ├── PolicyDto.java               # Policy create/update payload
-    │   │   ├── PolicyOptimizationResult.java# Optimization engine response
-    │   │   └── RegisterRequest.java         # Registration request body
-    │   ├── entity/
-    │   │   ├── Admin.java                   # Admin JPA entity
-    │   │   ├── Policy.java                  # Policy JPA entity
-    │   │   └── User.java                    # User JPA entity (with allocated policies)
-    │   ├── exception/
-    │   │   ├── GlobalExceptionHandler.java  # Centralized error handling
-    │   │   └── ResourceNotFoundException.java
-    │   ├── repository/
-    │   │   ├── AdminRepository.java
-    │   │   ├── PolicyRepository.java        # Custom queries: filter by type, risk, name
-    │   │   └── UserRepository.java
-    │   ├── service/
-    │   │   ├── CustomUserDetailsService.java# Loads user/admin for Spring Security
-    │   │   └── PolicyService.java           # Core business logic + optimization engine
-    │   └── ShieldApplication.java           # Application entry point
-    └── resources/
-        ├── application.properties           # App configuration
-        ├── schema.sql                        # Database schema reference
-        └── static/
-            ├── index.html                    # Landing page
-            ├── login.html                    # User login
-            ├── register.html                 # User registration
-            ├── profile.html                  # User dashboard
-            ├── admin/                        # Admin pages
-            │   ├── login.html
-            │   ├── dashboard.html
-            │   ├── newPolicy.html
-            │   └── editPolicy.html
-            ├── policies/                     # Policy pages
-            │   ├── config.html               # Optimization parameter form
-            │   ├── results.html              # Search results
-            │   └── detail.html               # Policy detail view
-            ├── css/style.css
-            └── js/
-                ├── auth.js                   # Auth utilities
-                └── main.js                   # Navbar, footer, fetch helpers
+    └── java/
+        ├── com/suraksha/shield/
+        │   ├── config/
+        │   │   ├── DatabaseSeeder.java          # Seeds admin + 35 sample policies on startup
+        │   │   ├── JwtAuthenticationFilter.java # Validates JWT on every request
+        │   │   ├── JwtTokenProvider.java        # JWT generation, parsing, validation
+        │   │   └── SecurityConfig.java          # Spring Security rules & filter chain
+        │   ├── controller/
+        │   │   ├── AdminController.java         # Admin CRUD API (/api/admin/**)
+        │   │   ├── AuthController.java          # Login & register API (/api/auth/**)
+        │   │   ├── PolicyController.java        # Policy search & allocation API
+        │   │   ├── UserController.java          # User profile API (/api/users/**)
+        │   │   └── ViewController.java          # Serves HTML templates
+        │   ├── dto/
+        │   │   ├── JwtResponse.java             # Auth response payload
+        │   │   ├── LoginRequest.java            # Login request body
+        │   │   ├── PolicyDto.java               # Policy create/update payload
+        │   │   ├── PolicyOptimizationResult.java# Optimization engine response
+        │   │   └── RegisterRequest.java         # Registration request body
+        │   ├── entity/
+        │   │   ├── Admin.java                   # Admin JPA entity
+        │   │   ├── Policy.java                  # Policy JPA entity
+        │   │   └── User.java                    # User JPA entity (with allocated policies)
+        │   ├── exception/
+        │   │   ├── CsvImportException.java      # Handle CSV parsing errors
+        │   │   ├── GlobalExceptionHandler.java  # Centralized error handling
+        │   │   └── ResourceNotFoundException.java
+        │   ├── repository/
+        │   │   ├── AdminRepository.java
+        │   │   ├── PolicyRepository.java        # Custom queries: filter by type, risk, name
+        │   │   └── UserRepository.java
+        │   ├── service/
+        │   │   ├── CsvImportService.java        # Process uploaded CSV / Kaggle files
+        │   │   ├── CustomUserDetails.java       # UserDetails implementation
+        │   │   ├── CustomUserDetailsService.java# Loads user/admin for Spring Security
+        │   │   └── PolicyService.java           # Core business logic + optimization engine
+        │   └── ShieldApplication.java           # Application entry point
+        └── resources/
+            ├── application.properties           # App configuration
+            ├── Kaggle.csv                       # Sample Kaggle dataset
+            ├── policies.csv                     # Sample standard CSV dataset
+            ├── schema.sql                       # Database schema reference
+            ├── static/
+            │   ├── css/style.css                # Custom styling
+            │   └── screenshots/                 # Application screenshots
+            └── templates/                       # Thymeleaf templates
+                ├── index.html                   # Landing page
+                ├── login.html                   # User login
+                ├── register.html                # User registration
+                ├── profile.html                 # User dashboard
+                ├── admin/                       # Admin pages
+                │   ├── login.html
+                │   ├── dashboard.html
+                │   ├── newPolicy.html
+                │   └── editPolicy.html
+                ├── fragments/                   # Reusable HTML layouts
+                │   └── layout.html
+                └── policies/                    # Policy pages
+                    ├── config.html              # Optimization parameter form
+                    ├── results.html             # Search results
+                    └── detail.html              # Policy detail view
 ```
 
 ---
@@ -280,6 +287,7 @@ Find a combination of policies where:
 |---|---|---|---|
 | `GET` | `/api/policies/results` | Public | Search & optimize policies |
 | `GET` | `/api/policies/{id}` | Public | Get policy by ID |
+| `GET` | `/api/policies/{id}/download` | Public | Download policy summary as text file |
 | `POST` | `/api/policies/{id}/allocate` | `ROLE_USER` | Allocate policy to profile |
 
 **Query Parameters for `/api/policies/results`:**
@@ -308,10 +316,11 @@ Find a combination of policies where:
 
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| `GET` | `/api/admin/dashboard` | `ROLE_ADMIN` | List all policies |
+| `GET` | `/api/admin/dashboard` | `ROLE_ADMIN` | List all policies (paginated) |
 | `POST` | `/api/admin/policies` | `ROLE_ADMIN` | Create a new policy |
 | `PUT` | `/api/admin/policies/{id}` | `ROLE_ADMIN` | Update a policy |
 | `DELETE` | `/api/admin/policies/{id}` | `ROLE_ADMIN` | Delete a policy |
+| `POST` | `/api/admin/policies/import` | `ROLE_ADMIN` | Import policies from CSV |
 
 **Policy Request Body (Create/Update):**
 ```json
@@ -382,12 +391,12 @@ cd InsurancePolicyOptimizer
 
 ### 2. Configure the Database
 
-Make sure MySQL is running, then update `src/main/resources/application.properties` if your credentials differ:
+Make sure MySQL is running, then set the `DB_PASSWORD` environment variable or update `src/main/java/resources/application.properties` if your credentials differ:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/policies_db?createDatabaseIfNotExist=true
+spring.datasource.url=jdbc:mysql://localhost:3306/policies_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 spring.datasource.username=root
-spring.datasource.password=root
+spring.datasource.password=${DB_PASSWORD}
 ```
 
 The database `policies_db` is created automatically on first run.
