@@ -458,84 +458,84 @@ The app seeds an admin account and 35 sample policies automatically on first sta
 ### 🏠 Landing Page
 > *"Optimize Your Protection. Secure Your Future."* — entry point with a live Policy Analysis widget showing projected savings.
 
-![Landing Page](src/main/java/resources/static/screenshots/landing.png)
+![Landing Page](src/main/resources/static/screenshots/landing.png)
 
 ---
 
 ### 🔐 User Login
 > Clean sign-in form with email/password, remember me toggle, and a direct link to Admin login.
 
-![Login Page](src/main/java/resources/static/screenshots/login.png)
+![Login Page](src/main/resources/static/screenshots/login.png)
 
 ---
 
 ### ⚙️ Policy Configuration
 > Users set optimization parameters — coverage range, max annual premium, policy type, and risk level — before running the engine.
 
-![Policy Configuration](src/main/java/resources/static/screenshots/policies-config.png)
+![Policy Configuration](src/main/resources/static/screenshots/policies-config.png)
 
 ---
 
 ### 🎯 Optimal Policy Combination
 > The backtracking engine returns the most cost-efficient combination. Example: ₹1,50,000 coverage for just ₹3,000/yr (Low Risk · Health).
 
-![Optimization Results](src/main/java/resources/static/screenshots/policies-results.png)
+![Optimization Results](src/main/resources/static/screenshots/policies-results.png)
 
 ---
 
 ### 📋 All Policies — Search Results
 > Browse all policies in a responsive card grid with premium, coverage, type, and risk profile at a glance.
 
-![Search Results](src/main/java/resources/static/screenshots/all-policies.png)
+![Search Results](src/main/resources/static/screenshots/all-policies.png)
 
 ---
 
 ### 📄 Policy Detail
 > Full breakdown — Core Financials (annual premium, total coverage, premium-to-cover ratio), Risk Analysis, and one-click **Allocate Policy**.
 
-![Policy Detail](src/main/java/resources/static/screenshots/policy-detail.png)
+![Policy Detail](src/main/resources/static/screenshots/policy-detail.png)
 
 ---
 
 ### 👤 User Dashboard
 > Personal dashboard showing profile info and all allocated policies with premium and coverage badges.
 
-![User Dashboard](src/main/java/resources/static/screenshots/user-profile.png)
+![User Dashboard](src/main/resources/static/screenshots/user-profile.png)
 
 ---
 
 ### 🛠️ Admin Dashboard
 > Full policy management table with edit/delete per row, plus Add Policy, Import CSV, and Import Kaggle CSV actions.
 
-![Admin Dashboard](src/main/java/resources/static/screenshots/admin-dashboard.png)
+![Admin Dashboard](src/main/resources/static/screenshots/admin-dashboard.png)
 
 ---
 
 ### ➕ Add New Policy
 > Admin form to create a policy — name, provider, type, risk level, premium, and coverage.
 
-![Add New Policy](src/main/java/resources/static/screenshots/admin-add-policy.png)
+![Add New Policy](src/main/resources/static/screenshots/admin-add-policy.png)
 
 ---
 
 ### ✏️ Edit Policy
 > Pre-filled edit form allowing admins to update any policy field and save instantly.
 
-![Edit Policy](src/main/java/resources/static/screenshots/admin-edit-policy.png)
+![Edit Policy](src/main/resources/static/screenshots/admin-edit-policy.png)
 
 ---
 
 ### 📥 Import CSV
 > Bulk-import policies via drag-and-drop. Required columns: `name, type, premium, coverage, riskLevel, provider`.
 
-![Import CSV](src/main/java/resources/static/screenshots/admin-import-csv.png)
+![Import CSV](src/main/resources/static/screenshots/admin-import-csv.png)
 
 ---
 
 ### 📊 Import Kaggle CSV
 > Import directly from Kaggle dataset format (semicolon-separated). Server auto-maps Kaggle columns (`POLICY TYPE 1`, `Premium`, `BENEFIT`, `SUBSTANDARD RISK`, `CHANNEL1`) to the project schema.
 
-![Import Kaggle CSV](src/main/java/resources/static/screenshots/admin-import-kaggle-csv.png)
+![Import Kaggle CSV](src/main/resources/static/screenshots/admin-import-kaggle-csv.png)
 
 ---
 
