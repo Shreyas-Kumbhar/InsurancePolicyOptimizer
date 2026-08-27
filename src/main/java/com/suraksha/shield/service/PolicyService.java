@@ -24,7 +24,7 @@ public class PolicyService {
     private final PolicyRepository policyRepository;
 
     public List<Policy> getAllPolicies() {
-        return policyRepository.findTop100Policies();
+        return policyRepository.findLatestPolicies();
     }
 
     public Page<Policy> getPaginatedPolicies(int page, int size) {
@@ -73,7 +73,7 @@ public class PolicyService {
         if (coverageMax == null) coverageMax = 5000000;
 
         if (name != null && !name.trim().isEmpty()) {
-            List<Policy> matching = policyRepository.findByNameContainingIgnoreCase(name);
+            List<Policy> matching = policyRepository.findByName(name);
             matching.sort(Comparator.comparingInt(Policy::getPremium));
             return new PolicyOptimizationResult(matching, false, 0, 0);
         }
@@ -84,13 +84,13 @@ public class PolicyService {
                 && !riskLevel.equalsIgnoreCase("Any Risk Level") && !riskLevel.trim().isEmpty());
 
         if (hasType && hasRisk) {
-            filteredPolicies = policyRepository.findTop200ByTypeAndRiskLevel(type, riskLevel, maxPremium);
+            filteredPolicies = policyRepository.findByTypeAndRiskLevel(type, riskLevel, maxPremium);
         } else if (hasType) {
-            filteredPolicies = policyRepository.findTop200ByType(type, maxPremium);
+            filteredPolicies = policyRepository.findByType(type, maxPremium);
         } else if (hasRisk) {
-            filteredPolicies = policyRepository.findTop200ByRiskLevel(riskLevel, maxPremium);
+            filteredPolicies = policyRepository.findByRiskLevel(riskLevel, maxPremium);
         } else {
-            filteredPolicies = policyRepository.findTop200MostEfficient(maxPremium);
+            filteredPolicies = policyRepository.findMostEfficient(maxPremium);
         }
 
         java.util.Map<Integer, Policy> bestByPremium = new java.util.HashMap<>();

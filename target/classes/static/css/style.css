@@ -1,0 +1,58 @@
+:root {
+  --primary: #003358;
+  --primary-container: #004a7c;
+  --on-primary: #ffffff;
+  --secondary: #2c694e;
+  --secondary-container: #aeeecb;
+  --background: #f9f9fe;
+  --on-background: #191c1f;
+  --surface: #f9f9fe;
+  --surface-variant: #e1e2e7;
+  --on-surface: #191c1f;
+  --tertiary: #003832;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--on-background);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .font-headline {
+  font-family: 'Manrope', sans-serif;
+}
+
+.text-primary { color: var(--primary) !important; }
+.bg-primary { background-color: var(--primary) !important; }
+.btn-primary { 
+  background-color: var(--primary); 
+  border-color: var(--primary); 
+  color: var(--on-primary); 
+}
+.btn-primary:hover {
+  background-color: var(--primary-container);
+  border-color: var(--primary-container);
+}
+.btn-secondary-custom {
+  background-color: var(--secondary-container);
+  color: #0e5138;
+}
+
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+}
+.navbar {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px);
+}
+.hero-section {
+  padding-top: 8rem;
+  padding-bottom: 6rem;
+}
+.glass-card {
+  background-color: rgba(249, 249, 254, 0.8);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(114, 119, 128, 0.15);
+  box-shadow: 0 12px 40px rgba(25, 28, 31, 0.06);
+}
